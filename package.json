@@ -5,6 +5,10 @@
   "version": "0.2.11",
   "publisher": "paularlott",
   "license": "MIT",
+  "pricing": "Free",
+  "sponsor": {
+    "url": "https://github.com/sponsors/paularlott"
+  },
   "repository": {
     "type": "git",
     "url": "https://github.com/paularlott/scriptling-vscode"
