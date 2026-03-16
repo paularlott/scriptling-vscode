@@ -8,8 +8,11 @@ The Agent class is implemented in Scriptling and provides an agentic
 loop for tool-calling conversations.
 """
 
-from typing import Optional, Any
+from typing import Optional, Any, TYPE_CHECKING
 from scriptling.ai import OpenAIClient, ToolRegistry
+
+if TYPE_CHECKING:
+    from scriptling.ai.memory import MemoryStore
 
 class Message:
     """Represents a message in the conversation."""
@@ -24,6 +27,11 @@ class Agent:
 
     An agent maintains conversation state and can execute tools
     in an agentic loop until a response is ready.
+
+    When a memory store is provided, the agent automatically:
+    - Adds memory tools (memory_remember, memory_recall, memory_forget)
+    - Appends memory instructions to the system prompt
+    - Pre-loads preferences into the system prompt
     """
 
     client: OpenAIClient
@@ -32,6 +40,7 @@ class Agent:
     model: str
     messages: list[dict[str, Any]]
     tool_schemas: list[dict[str, Any]]
+    memory: Optional["MemoryStore"]
 
     def __init__(
         self,
@@ -39,7 +48,8 @@ class Agent:
         *,
         tools: Optional[ToolRegistry] = None,
         system_prompt: str = "",
-        model: str = ""
+        model: str = "",
+        memory: Optional["MemoryStore"] = None
     ) -> None:
         """
         Initialize an Agent.
@@ -49,6 +59,9 @@ class Agent:
             tools: Optional ToolRegistry with tool definitions
             system_prompt: System prompt for the agent
             model: Model identifier (e.g., "gpt-4")
+            memory: Optional MemoryStore for persistent memory across conversations.
+                    When provided, memory tools are automatically added and the
+                    system prompt is augmented with memory instructions.
         """
         ...
 
