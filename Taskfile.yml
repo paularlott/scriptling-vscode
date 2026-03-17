@@ -1,0 +1,75 @@
+# Taskfile.yml for building Scriptling VSCode Extension
+version: "3"
+
+vars:
+  OUT_DIR: out
+  DIST_DIR: dist
+  VERSION:
+    sh: node -p "require('./package.json').version"
+
+tasks:
+  clean:
+    desc: Clean build artifacts
+    cmds:
+      - rm -rf {{.OUT_DIR}}
+      - rm -rf {{.DIST_DIR}}
+
+  install:
+    desc: Install dependencies
+    cmds:
+      - npm install
+
+  compile:
+    desc: Compile TypeScript
+    cmds:
+      - npm run compile
+
+  lint:
+    desc: Run linter
+    cmds:
+      - npm run lint
+
+  build:
+    desc: Build extension (compile only)
+    deps: [compile]
+
+  package:
+    desc: Package extension as .vsix
+    deps: [compile]
+    cmds:
+      - mkdir -p {{.DIST_DIR}}
+      - npx vsce package --out {{.DIST_DIR}}/scriptling-{{.VERSION}}.vsix
+
+  release:
+    desc: Tag version and create GitHub release with .vsix file
+    deps: [package]
+    cmds:
+      - |
+        # Check if tag exists
+        if git tag -l v{{.VERSION}} | grep -q v{{.VERSION}}; then
+          echo "Tag v{{.VERSION}} already exists, skipping tag creation"
+        else
+          echo "Creating tag v{{.VERSION}}"
+          git tag -a v{{.VERSION}} -m "Release {{.VERSION}}"
+          git push origin v{{.VERSION}}
+        fi
+        # Create release and upload vsix
+        gh release create v{{.VERSION}} -t "Release {{.VERSION}}" -n "Scriptling VSCode Extension {{.VERSION}}" {{.DIST_DIR}}/scriptling-{{.VERSION}}.vsix
+
+  publish:
+    desc: Publish extension to VSCode Marketplace
+    deps: [package]
+    cmds:
+      - npx vsce publish --packagePath {{.DIST_DIR}}/scriptling-{{.VERSION}}.vsix
+
+  publish-release:
+    desc: Publish to marketplace and create GitHub release
+    deps: [package]
+    cmds:
+      - task: publish
+      - task: release
+
+  watch:
+    desc: Watch for changes and recompile
+    cmds:
+      - npm run watch
