@@ -2,7 +2,7 @@
   "name": "scriptling",
   "displayName": "Scriptling Language Support",
   "description": "IntelliSense and language support for Scriptling extension libraries (ai, mcp, fuzzy, agent)",
-  "version": "0.3.1",
+  "version": "0.3.2",
   "publisher": "paularlott",
   "license": "MIT",
   "pricing": "Free",
