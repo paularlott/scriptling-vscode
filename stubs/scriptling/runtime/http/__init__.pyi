@@ -5,7 +5,7 @@ HTTP server route registration and response helpers for building
 web servers and APIs.
 """
 
-from typing import Optional, Any, Callable
+from typing import Optional, Any, Callable, Union
 
 class Request:
     """
@@ -211,5 +211,120 @@ def parse_query(query_string: str) -> dict[str, Any]:
 
     Example:
         params = runtime.http.parse_query("name=John&age=30")
+    """
+    ...
+
+
+class WebSocketClient:
+    """
+    WebSocket client connection passed to server-side WebSocket handlers.
+
+    Represents a connected WebSocket client and provides methods to
+    send and receive messages.
+
+    Attributes:
+        remote_addr: Remote address of the connected client
+    """
+
+    remote_addr: str
+
+    def send(self, message: Union[str, dict[str, Any]]) -> Optional[Exception]:
+        """
+        Send a text message to the client.
+
+        Parameters:
+            message: Text string or dict (will be JSON-encoded)
+
+        Returns:
+            None on success, or an error/exception if send fails
+
+        Example:
+            client.send("Welcome to the chat!")
+            client.send({"type": "message", "text": "Hello!"})
+        """
+        ...
+
+    def send_binary(self, data: list[int]) -> Optional[Exception]:
+        """
+        Send binary data to the client.
+
+        Parameters:
+            data: List of byte values (0-255)
+
+        Returns:
+            None on success, or an error/exception if send fails
+
+        Example:
+            client.send_binary([72, 101, 108, 108, 111])
+        """
+        ...
+
+    def receive(self, timeout: float = 30) -> Any:
+        """
+        Receive a message from the client.
+
+        Parameters:
+            timeout: Maximum time to wait for a message (seconds)
+
+        Returns:
+            The received message (str for text, list for binary),
+            or None if timeout or connection closed
+
+        Example:
+            msg = client.receive(timeout=60)
+            if msg:
+                if isinstance(msg, str):
+                    print(f"Text: {msg}")
+                elif isinstance(msg, list):
+                    print(f"Binary: {len(msg)} bytes")
+        """
+        ...
+
+    def connected(self) -> bool:
+        """
+        Check if the client connection is still open.
+
+        Returns:
+            True if connected, False otherwise
+        """
+        ...
+
+    def close(self) -> None:
+        """
+        Close the client connection.
+        """
+        ...
+
+
+def websocket(path: str, handler: str) -> None:
+    """
+    Register a WebSocket route.
+
+    The handler function receives a WebSocketClient object for each
+    connected client and typically runs a message loop.
+
+    Parameters:
+        path: URL path for the WebSocket endpoint (e.g., "/chat")
+        handler: Handler function as "library.function" string
+
+    Handler signature:
+        def handler(client: WebSocketClient) -> None:
+            client.send("Welcome!")
+            while client.connected():
+                msg = client.receive(timeout=60)
+                if msg:
+                    client.send(f"Echo: {msg}")
+
+    Example:
+        # Register WebSocket endpoint
+        runtime.http.websocket("/chat", "handlers.chat_handler")
+
+        # In handlers.py:
+        def chat_handler(client):
+            client.send("Welcome to the chat!")
+            while client.connected():
+                msg = client.receive(timeout=60)
+                if msg:
+                    client.send(f"Server: {msg}")
     """
     ...
