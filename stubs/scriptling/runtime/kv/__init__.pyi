@@ -50,6 +50,26 @@ class Storage:
         """
         ...
 
+    def incr(self, key: str, delta: int = 1) -> int:
+        """
+        Atomically increment an integer value, returns new value.
+
+        If the key does not exist it is initialised to 0 before incrementing.
+
+        Parameters:
+            key: The key to increment
+            delta: Amount to add (default: 1)
+
+        Returns:
+            New integer value after increment
+
+        Example:
+            kv.default.set("hits", 0)
+            count = kv.default.incr("hits")      # 1
+            count = kv.default.incr("hits", 5)   # 6
+        """
+        ...
+
     def delete(self, key: str) -> None:
         """
         Remove a key from the store.
