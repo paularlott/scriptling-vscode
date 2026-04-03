@@ -8,7 +8,7 @@ Scriptling is a Python-like scripting language for LLM agents. This extension en
 
 - **scriptling.ai** - AI/LLM library for OpenAI, Claude, Gemini, Ollama, ZAI, and Mistral
 - **scriptling.mcp** - Model Context Protocol client library
-- **scriptling.fuzzy** - Fuzzy string matching utilities
+- **scriptling.similarity** - String matching and similarity utilities including fuzzy search and MinHash
 - **scriptling.ai.agent** - AI agent with tool-calling capabilities
 - **scriptling.ai.tools** - AI tool registry and utilities
 - **scriptling.ai.memory** - AI memory/context management

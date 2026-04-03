@@ -1,8 +1,8 @@
 {
   "name": "scriptling",
   "displayName": "Scriptling Language Support",
-  "description": "IntelliSense and language support for Scriptling extension libraries (ai, mcp, fuzzy, agent)",
-  "version": "0.4.1",
+  "description": "IntelliSense and language support for Scriptling extension libraries (ai, mcp, similarity, agent)",
+  "version": "0.4.2",
   "publisher": "paularlott",
   "license": "MIT",
   "pricing": "Free",
@@ -25,7 +25,10 @@
     "python",
     "ai",
     "mcp",
-    "llm"
+    "llm",
+    "agents",
+    "sandbox",
+    "go"
   ],
   "activationEvents": [
     "onLanguage:python"
