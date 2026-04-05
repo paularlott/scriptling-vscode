@@ -8,7 +8,7 @@ The Agent class is implemented in Scriptling and provides an agentic
 loop for tool-calling conversations.
 """
 
-from typing import Optional, Any, TYPE_CHECKING
+from typing import Optional, Any, TYPE_CHECKING, Union
 from scriptling.ai import OpenAIClient, ToolRegistry
 
 if TYPE_CHECKING:
@@ -41,6 +41,9 @@ class Agent:
     messages: list[dict[str, Any]]
     tool_schemas: list[dict[str, Any]]
     memory: Optional["MemoryStore"]
+    max_tokens: int
+    compaction_threshold: int
+    request_timeout_ms: int
 
     def __init__(
         self,
@@ -49,7 +52,9 @@ class Agent:
         tools: Optional[ToolRegistry] = None,
         system_prompt: str = "",
         model: str = "",
-        memory: Optional["MemoryStore"] = None
+        memory: Optional["MemoryStore"] = None,
+        max_tokens: int = 32000,
+        compaction_threshold: int = 80
     ) -> None:
         """
         Initialize an Agent.
@@ -62,6 +67,11 @@ class Agent:
             memory: Optional MemoryStore for persistent memory across conversations.
                     When provided, memory tools are automatically added and the
                     system prompt is augmented with memory instructions.
+            max_tokens: Maximum token budget for the conversation. When the estimated
+                       token count reaches the compaction threshold, the conversation
+                       history is automatically summarized. Default: 32000
+            compaction_threshold: Percentage of max_tokens at which auto-compaction
+                                 triggers (0-100). Default: 80
         """
         ...
 
@@ -111,6 +121,27 @@ class Agent:
         """
         ...
 
+    def interact(self, max_iterations: int = 25) -> None:
+        """
+        Start an interactive terminal session using the TUI console.
+
+        Requires scriptling.console to be registered. After importing
+        scriptling.ai.agent.interact, this method becomes available.
+
+        During each turn:
+        - Streams reasoning and assistant text into the main panel as it arrives
+        - Keeps the spinner running until the turn is complete
+        - Shows tool call and result messages with status and preview
+        - Uses ai.collect_stream() for streaming with configurable timeouts
+        - Preserves conversation history between turns
+
+        Built-in commands: /clear, /model, /history, /exit
+
+        Parameters:
+            max_iterations: Maximum tool call rounds per message. Default: 25
+        """
+        ...
+
     def set_messages(self, messages: list[dict[str, Any]]) -> None:
         """
         Set the conversation messages.
@@ -119,6 +150,3 @@ class Agent:
             messages: List of message dicts to set
         """
         ...
-
-# Re-export Union for the type hint
-from typing import Union

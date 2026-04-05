@@ -77,6 +77,18 @@ class ChatStream:
         """
         ...
 
+    def next_timeout(self, timeout_ms: int) -> Optional[dict[str, Any]]:
+        """
+        Get the next chunk from the stream, but stop waiting after a timeout.
+
+        Parameters:
+            timeout_ms: Timeout in milliseconds
+
+        Returns:
+            The next response chunk, {"timed_out": True}, or None if the stream is complete
+        """
+        ...
+
     def err(self) -> Optional[str]:
         """
         Get any error from the stream.
@@ -115,7 +127,8 @@ class OpenAIClient:
         tools: Optional[list[dict[str, Any]]] = None,
         temperature: Optional[float] = None,
         top_p: Optional[float] = None,
-        max_tokens: Optional[int] = None
+        max_tokens: Optional[int] = None,
+        timeout_ms: Optional[int] = None
     ) -> dict[str, Any]:
         """
         Create a chat completion.
@@ -128,6 +141,7 @@ class OpenAIClient:
             temperature: Sampling temperature (0.0-2.0)
             top_p: Nucleus sampling threshold (0.0-1.0)
             max_tokens: Maximum tokens to generate
+            timeout_ms: Request timeout in milliseconds
 
         Returns:
             Response dict containing id, choices, usage, etc.
@@ -140,9 +154,11 @@ class OpenAIClient:
         messages: Union[str, list[dict[str, Any]]],
         *,
         system_prompt: Optional[str] = None,
+        tools: Optional[list[dict[str, Any]]] = None,
         temperature: Optional[float] = None,
         top_p: Optional[float] = None,
-        max_tokens: Optional[int] = None
+        max_tokens: Optional[int] = None,
+        timeout_ms: Optional[int] = None
     ) -> ChatStream:
         """
         Create a streaming chat completion.
@@ -151,21 +167,23 @@ class OpenAIClient:
             model: Model identifier (e.g., "gpt-4", "gpt-3.5-turbo")
             messages: Either a string (user message) or a list of message dicts
             system_prompt: System prompt to use when messages is a string
+            tools: List of tool schema dicts from ToolRegistry.build()
             temperature: Sampling temperature (0.0-2.0)
             top_p: Nucleus sampling threshold (0.0-1.0)
             max_tokens: Maximum tokens to generate
+            timeout_ms: Overall request timeout in milliseconds
 
         Returns:
             ChatStream object with a next() method
         """
         ...
 
-    def models(self) -> list[dict[str, Any]]:
+    def models(self) -> dict[str, Any]:
         """
         List available models.
 
         Returns:
-            List of model dicts with id, created, owned_by, etc.
+            Response dict with object and data fields. data contains the model list.
         """
         ...
 
@@ -380,5 +398,117 @@ def thinking(response: dict[str, Any]) -> list[str]:
 
     Returns:
         List of thinking block strings (empty if no thinking blocks)
+    """
+    ...
+
+def tool_calls(response_or_message: Union[dict[str, Any], list[Any]]) -> list[dict[str, Any]]:
+    """
+    Extract normalized tool calls from a completion response, message dict, or tool call list.
+
+    Parameters:
+        response_or_message: Completion response dict, assistant message dict, or tool call list
+
+    Returns:
+        List of normalized tool call dicts with id, type, and function fields
+    """
+    ...
+
+def execute_tool_calls(
+    registry: ToolRegistry,
+    tool_calls: list[dict[str, Any]]
+) -> list[dict[str, Any]]:
+    """
+    Execute normalized tool calls using handlers from a ToolRegistry.
+
+    Parameters:
+        registry: Tool registry containing handlers
+        tool_calls: Tool call dicts, typically from tool_calls(...)
+
+    Returns:
+        List of tool result message dicts with role, tool_call_id, and content
+    """
+    ...
+
+def collect_stream(
+    stream: ChatStream,
+    *,
+    chunk_timeout_ms: Optional[int] = None,
+    first_chunk_timeout_ms: Optional[int] = None,
+    on_event: Optional[Callable[[dict[str, Any]], Any]] = None
+) -> dict[str, Any]:
+    """
+    Consume a ChatStream and aggregate content, reasoning, tool calls, and finish status.
+
+    Parameters:
+        stream: Stream returned by client.completion_stream()
+        chunk_timeout_ms: Per-chunk timeout in milliseconds
+        on_event: Optional callback invoked with event dicts while chunks are processed
+
+    Returns:
+        Aggregated result dict with content, reasoning, tool_calls, finish_reason, timed_out,
+        assistant_message, and error (only present when timed_out is true)
+    """
+    ...
+
+def tool_round(
+    client: OpenAIClient,
+    model: str,
+    messages: Union[str, list[dict[str, Any]]],
+    registry: ToolRegistry,
+    *,
+    stream: bool = False,
+    chunk_timeout_ms: Optional[int] = None,
+    on_event: Optional[Callable[[dict[str, Any]], Any]] = None,
+    system_prompt: Optional[str] = None,
+    temperature: Optional[float] = None,
+    top_p: Optional[float] = None,
+    max_tokens: Optional[int] = None,
+    timeout_ms: Optional[int] = None
+) -> dict[str, Any]:
+    """
+    Run one tool-enabled completion round and return the assistant message, tool calls, and tool results.
+
+    Parameters:
+        client: AI client instance
+        model: Model identifier
+        messages: User message string or message list
+        registry: Tool registry containing schemas and handlers
+        stream: Use completion_stream() instead of completion()
+        chunk_timeout_ms: Per-chunk timeout for streaming mode
+        on_event: Optional callback invoked with event dicts while chunks are processed
+        system_prompt: System prompt when messages is a string
+        temperature: Sampling temperature
+        top_p: Nucleus sampling threshold
+        max_tokens: Maximum tokens to generate
+        timeout_ms: Overall request timeout in milliseconds
+
+    Returns:
+        Round result dict with assistant_message, content, reasoning, tool_calls, tool_results,
+        finish_reason, and timed_out. Non-streaming mode also includes response.
+    """
+    ...
+
+def estimate_tokens(
+    request: Union[str, list[dict[str, Any]], dict[str, Any]],
+    response: dict[str, Any]
+) -> dict[str, int]:
+    """
+    Estimate token counts for request messages and response.
+
+    Uses a character-based heuristic (~4 characters per token) to provide
+    a fast, reproducible approximation of token counts.
+
+    Parameters:
+        request: The messages sent to the AI. Can be:
+            - A string (user message)
+            - A list of message dicts with "role" and "content" keys
+            - A completion request dict with a "messages" key
+        response: The completion response from client.completion() or client.response_create()
+
+    Returns:
+        Dict with token usage estimates:
+            - prompt_tokens (int): Estimated tokens in the request messages
+            - completion_tokens (int): Estimated tokens in the response
+            - total_tokens (int): Sum of prompt and completion tokens
     """
     ...

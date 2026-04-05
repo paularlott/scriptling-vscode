@@ -77,22 +77,24 @@ class Panel:
         """
         ...
 
-    def add_message(self, *args: Any, label: str = "") -> None:
+    def add_message(self, *args: Any, label: str = "", role: str = "") -> None:
         """
         Add a message to the panel.
 
         Parameters:
             *args: Values to display (joined with spaces)
             label: Optional label prefix for the message
+            role: Message role (user, assistant, system, thinking, tool)
         """
         ...
 
-    def stream_start(self, label: str = "") -> None:
+    def stream_start(self, label: str = "", role: str = "") -> None:
         """
         Begin a streaming message in this panel.
 
         Parameters:
             label: Optional label prefix for the stream
+            role: Message role (user, assistant, system, thinking, tool)
         """
         ...
 
