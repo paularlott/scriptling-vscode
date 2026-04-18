@@ -5,7 +5,7 @@ This library provides WebSocket client functionality to connect to WebSocket
 servers and exchange messages.
 
 Example:
-    import scriptling.websocket as ws
+    import scriptling.net.websocket as ws
 
     # Connect to a WebSocket server
     conn = ws.connect("ws://echo.websocket.org", timeout=5)
