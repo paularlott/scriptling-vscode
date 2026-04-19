@@ -77,12 +77,12 @@ class ChatStream:
         """
         ...
 
-    def next_timeout(self, timeout_ms: int) -> Optional[dict[str, Any]]:
+    def next_timeout(self, timeout: int) -> Optional[dict[str, Any]]:
         """
         Get the next chunk from the stream, but stop waiting after a timeout.
 
         Parameters:
-            timeout_ms: Timeout in milliseconds
+            timeout: Timeout in seconds
 
         Returns:
             The next response chunk, {"timed_out": True}, or None if the stream is complete
@@ -128,7 +128,7 @@ class OpenAIClient:
         temperature: Optional[float] = None,
         top_p: Optional[float] = None,
         max_tokens: Optional[int] = None,
-        timeout_ms: Optional[int] = None
+        timeout: Optional[int] = None
     ) -> dict[str, Any]:
         """
         Create a chat completion.
@@ -141,7 +141,7 @@ class OpenAIClient:
             temperature: Sampling temperature (0.0-2.0)
             top_p: Nucleus sampling threshold (0.0-1.0)
             max_tokens: Maximum tokens to generate
-            timeout_ms: Request timeout in milliseconds
+            timeout: Request timeout in seconds
 
         Returns:
             Response dict containing id, choices, usage, etc.
@@ -158,7 +158,7 @@ class OpenAIClient:
         temperature: Optional[float] = None,
         top_p: Optional[float] = None,
         max_tokens: Optional[int] = None,
-        timeout_ms: Optional[int] = None
+        timeout: Optional[int] = None
     ) -> ChatStream:
         """
         Create a streaming chat completion.
@@ -171,7 +171,7 @@ class OpenAIClient:
             temperature: Sampling temperature (0.0-2.0)
             top_p: Nucleus sampling threshold (0.0-1.0)
             max_tokens: Maximum tokens to generate
-            timeout_ms: Overall request timeout in milliseconds
+            timeout: Overall request timeout in seconds
 
         Returns:
             ChatStream object with a next() method
@@ -432,8 +432,8 @@ def execute_tool_calls(
 def collect_stream(
     stream: ChatStream,
     *,
-    chunk_timeout_ms: Optional[int] = None,
-    first_chunk_timeout_ms: Optional[int] = None,
+    chunk_timeout: Optional[int] = None,
+    first_chunk_timeout: Optional[int] = None,
     on_event: Optional[Callable[[dict[str, Any]], Any]] = None
 ) -> dict[str, Any]:
     """
@@ -441,7 +441,7 @@ def collect_stream(
 
     Parameters:
         stream: Stream returned by client.completion_stream()
-        chunk_timeout_ms: Per-chunk timeout in milliseconds
+        chunk_timeout: Per-chunk timeout in seconds
         on_event: Optional callback invoked with event dicts while chunks are processed
 
     Returns:
@@ -457,13 +457,13 @@ def tool_round(
     registry: ToolRegistry,
     *,
     stream: bool = False,
-    chunk_timeout_ms: Optional[int] = None,
+    chunk_timeout: Optional[int] = None,
     on_event: Optional[Callable[[dict[str, Any]], Any]] = None,
     system_prompt: Optional[str] = None,
     temperature: Optional[float] = None,
     top_p: Optional[float] = None,
     max_tokens: Optional[int] = None,
-    timeout_ms: Optional[int] = None
+    timeout: Optional[int] = None
 ) -> dict[str, Any]:
     """
     Run one tool-enabled completion round and return the assistant message, tool calls, and tool results.
@@ -474,13 +474,13 @@ def tool_round(
         messages: User message string or message list
         registry: Tool registry containing schemas and handlers
         stream: Use completion_stream() instead of completion()
-        chunk_timeout_ms: Per-chunk timeout for streaming mode
+        chunk_timeout: Per-chunk timeout in seconds for streaming mode
         on_event: Optional callback invoked with event dicts while chunks are processed
         system_prompt: System prompt when messages is a string
         temperature: Sampling temperature
         top_p: Nucleus sampling threshold
         max_tokens: Maximum tokens to generate
-        timeout_ms: Overall request timeout in milliseconds
+        timeout: Overall request timeout in seconds
 
     Returns:
         Round result dict with assistant_message, content, reasoning, tool_calls, tool_results,

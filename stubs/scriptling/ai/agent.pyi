@@ -43,7 +43,7 @@ class Agent:
     memory: Optional["MemoryStore"]
     max_tokens: int
     compaction_threshold: int
-    request_timeout_ms: int
+    request_timeout: int
 
     def __init__(
         self,
@@ -54,7 +54,8 @@ class Agent:
         model: str = "",
         memory: Optional["MemoryStore"] = None,
         max_tokens: int = 32000,
-        compaction_threshold: int = 80
+        compaction_threshold: int = 80,
+        request_timeout: int = 300
     ) -> None:
         """
         Initialize an Agent.
@@ -72,6 +73,9 @@ class Agent:
                        history is automatically summarized. Default: 32000
             compaction_threshold: Percentage of max_tokens at which auto-compaction
                                  triggers (0-100). Default: 80
+            request_timeout: Timeout in seconds for each LLM completion request.
+                           LLM calls can be slow, especially with tool-calling
+                           loops or large contexts. Default: 300
         """
         ...
 
