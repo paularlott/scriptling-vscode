@@ -741,15 +741,3 @@ def create(
     """
     ...
 
-
-def decode_json(json_string: str) -> Any:
-    """
-    Decode a JSON string to a scriptling value.
-
-    Parameters:
-        json_string: JSON string to decode
-
-    Returns:
-        Decoded value (dict, list, string, int, float, bool, or None)
-    """
-    ...
