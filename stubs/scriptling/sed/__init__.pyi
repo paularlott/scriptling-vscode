@@ -1,5 +1,5 @@
 """
-Scriptling Text Library - Type stubs for IntelliSense support.
+Scriptling Sed Library - Type stubs for IntelliSense support.
 
 In-place file content replacement and capture group extraction.
 Replace functions accept a file or directory as the path and return the number
@@ -39,17 +39,17 @@ def replace(
         Number of files modified (int)
 
     Example:
-        import scriptling.text as text
+        import scriptling.sed as sed
 
         # Replace in a single file
-        n = text.replace("old_func()", "new_func()", "/path/to/file.py")
+        n = sed.replace("old_func()", "new_func()", "/path/to/file.py")
 
         # Replace across all Python files recursively
-        n = text.replace("old_func()", "new_func()", "./src", recursive=True, glob="*.py")
+        n = sed.replace("old_func()", "new_func()", "./src", recursive=True, glob="*.py")
         print(f"{n} file(s) modified")
 
         # Case-insensitive replace
-        n = text.replace("TODO", "DONE", "./src", ignore_case=True, recursive=True)
+        n = sed.replace("TODO", "DONE", "./src", ignore_case=True, recursive=True)
     """
     ...
 
@@ -85,10 +85,10 @@ def replace_pattern(
         Number of files modified (int)
 
     Example:
-        import scriptling.text as text
+        import scriptling.sed as sed
 
         # Rename a function across all Python files
-        n = text.replace_pattern(
+        n = sed.replace_pattern(
             r"def old_(\w+)\(",
             "def new_${1}(",
             "./src",
@@ -98,7 +98,7 @@ def replace_pattern(
         print(f"{n} file(s) modified")
 
         # Case-insensitive regex replace
-        n = text.replace_pattern(r"foo\\.bar", "foo.baz", "./src", ignore_case=True)
+        n = sed.replace_pattern(r"foo\\.bar", "foo.baz", "./src", ignore_case=True)
     """
     ...
 
@@ -132,21 +132,21 @@ def extract(
             - groups (list[str]): Captured group strings (empty if no capture groups)
 
     Example:
-        import scriptling.text as text
+        import scriptling.sed as sed
 
         # Extract all function names from Python files
-        matches = text.extract(r"def (\\w+)\\(", "./src", recursive=True, glob="*.py")
+        matches = sed.extract(r"def (\\w+)\\(", "./src", recursive=True, glob="*.py")
         for m in matches:
             print(f"{m['file']}:{m['line']}: {m['groups'][0]}")
 
         # Extract key=value pairs
-        matches = text.extract(r"(\\w+)=(\\S+)", "./config.txt")
+        matches = sed.extract(r"(\\w+)=(\\S+)", "./config.txt")
         for m in matches:
             key, value = m["groups"]
             print(f"{key} -> {value}")
 
         # Extract version strings across a project
-        matches = text.extract(r"version\\s*=\\s*[\"']([\\d.]+)[\"']", "./src", recursive=True)
+        matches = sed.extract(r"version\\s*=\\s*[\"']([\\d.]+)[\"']", "./src", recursive=True)
         versions = [m["groups"][0] for m in matches]
     """
     ...
