@@ -70,6 +70,27 @@ class ContainerClient:
         """
         ...
 
+    def login(self, server: str, username: str, password: str) -> None:
+        """
+        Authenticate with a container registry.
+
+        For Docker/Podman the credentials are stored on the client and injected
+        automatically into subsequent image_pull calls for the same registry.
+        For Apple Containers the host CLI credential store is updated.
+
+        Parameters:
+            server (str): Registry server e.g. "ghcr.io" or "registry.example.com".
+                          Pass "" to target Docker Hub.
+            username (str): Registry username
+            password (str): Registry password or access token
+
+        Example:
+            c.login("", "myuser", "mytoken")           # Docker Hub
+            c.login("ghcr.io", "myuser", "ghp_token")  # GitHub Container Registry
+            c.image_pull("ghcr.io/myorg/myimage:latest")
+        """
+        ...
+
     def image_list(self) -> list[dict]:
         """
         List locally available images.
