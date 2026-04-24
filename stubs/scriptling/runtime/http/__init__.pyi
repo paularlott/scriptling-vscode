@@ -296,6 +296,22 @@ class WebSocketClient:
         ...
 
 
+def not_found(handler: str) -> None:
+    """
+    Register a custom 404 Not Found handler.
+
+    Parameters:
+        handler: Handler function as "library.function" string
+
+    The handler receives the request object and should return a response.
+    It is called when no route matches the request path, or when the
+    --web-root directory is configured but the file is not found.
+
+    Example:
+        runtime.http.not_found("handlers.not_found")
+    """
+    ...
+
 def websocket(path: str, handler: str) -> None:
     """
     Register a WebSocket route.
