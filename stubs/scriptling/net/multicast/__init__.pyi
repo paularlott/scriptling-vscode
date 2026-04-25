@@ -88,7 +88,8 @@ class MulticastGroup:
 def join(
     group_addr: str,
     port: int,
-    interface: str = ""
+    interface: str = "",
+    ttl: int = 1
 ) -> MulticastGroup:
     """
     Join a multicast group.
@@ -97,6 +98,8 @@ def join(
         group_addr: Multicast group address (e.g., "239.1.1.1")
         port: Port number for the multicast group
         interface: Network interface to bind to (default: auto-select)
+        ttl: Multicast TTL / hop limit (default: 1, local network only;
+             increase to route across subnets)
 
     Returns:
         Group object with send(), receive(), close() methods
