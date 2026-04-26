@@ -296,15 +296,19 @@ class ContainerClient:
         """
         ...
 
-    def volume_create(self, name: str) -> None:
+    def volume_create(self, name: str, *, size: str = "") -> None:
         """
         Create a named volume.
 
         Parameters:
             name (str): Volume name
+            size (str, optional): Volume size e.g. "20G" or "512M".
+                                  Supported by Apple Containers only;
+                                  silently ignored for Docker and Podman.
 
         Example:
             c.volume_create("mydata")
+            c.volume_create("mydata", size="20G")
         """
         ...
 

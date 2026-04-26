@@ -2,7 +2,7 @@
   "name": "scriptling",
   "displayName": "Scriptling Language Support",
   "description": "IntelliSense and language support for Scriptling extension libraries (ai, mcp, similarity, agent)",
-  "version": "0.4.10",
+  "version": "0.4.11",
   "publisher": "paularlott",
   "license": "MIT",
   "pricing": "Free",
