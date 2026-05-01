@@ -7,6 +7,8 @@ Mathematical functions and constants.
 from typing import List, Union
 
 Number = Union[int, float]
+Vector = Union[List[Number], "FloatArray"]
+Matrix = Union[List[List[Number]], "FloatArray"]
 
 # Constants
 pi: float
@@ -519,65 +521,108 @@ def dist(p: List[Number], q: List[Number]) -> float:
     """
     ...
 
-def softmax(x: List[Number]) -> List[float]:
+def softmax(x: Vector) -> Union[List[float], "FloatArray"]:
     """
     Return numerically stable softmax of a vector.
 
     Parameters:
-        x: List of numbers
+        x: List of numbers or 1D FloatArray
 
     Returns:
-        Probability distribution (list of floats summing to 1.0)
+        Probability distribution summing to 1.0. Returns FloatArray if input is FloatArray.
     """
     ...
 
-def dot(a: List[Number], b: List[Number]) -> float:
+def dot(a: Vector, b: Vector) -> float:
     """
     Return the dot product of two vectors.
 
     Parameters:
-        a: List of numbers
-        b: List of numbers (same length as a)
+        a: List of numbers or 1D FloatArray
+        b: List of numbers or 1D FloatArray (same length as a)
 
     Returns:
         Float dot product
     """
     ...
 
-def matmul(a: List[List[Number]], b: List[List[Number]]) -> List[List[float]]:
+def matmul(a: Matrix, b: Matrix) -> Union[List[List[float]], "FloatArray"]:
     """
     Matrix-matrix multiply. a is (M x K), b is (K x N). Returns (M x N) matrix.
 
     Parameters:
-        a: Matrix as list of lists (M x K)
-        b: Matrix as list of lists (K x N)
+        a: Matrix as list of lists or 2D FloatArray (M x K)
+        b: Matrix as list of lists or 2D FloatArray (K x N)
 
     Returns:
-        Matrix as list of lists (M x N)
+        Matrix as list of lists or 2D FloatArray (M x N). Returns FloatArray if either input is FloatArray.
     """
     ...
 
-def transpose(m: List[List[Number]]) -> List[List[float]]:
+def transpose(m: Matrix) -> Union[List[List[float]], "FloatArray"]:
     """
     Transpose a 2D matrix. Rows become columns.
 
     Parameters:
-        m: Matrix as list of lists
+        m: Matrix as list of lists or 2D FloatArray
 
     Returns:
-        New transposed matrix
+        New transposed matrix. Returns FloatArray if input is FloatArray.
     """
     ...
 
-def mat_add(a: List[List[Number]], b: List[List[Number]]) -> List[List[float]]:
+def mat_add(a: Matrix, b: Matrix) -> Union[List[List[float]], "FloatArray"]:
     """
     Element-wise addition of two matrices.
 
     Parameters:
-        a: Matrix as list of lists
-        b: Matrix as list of lists (same shape as a)
+        a: Matrix as list of lists or 2D FloatArray
+        b: Matrix as list of lists or 2D FloatArray (same shape as a)
 
     Returns:
-        New matrix with element-wise sums
+        New matrix with element-wise sums. Returns FloatArray if either input is FloatArray.
     """
     ...
+
+def array(data: Union[List[Number], List[List[Number]], "FloatArray"]) -> "FloatArray":
+    """
+    Create an efficient FloatArray from a list.
+
+    Accepts a 1D list of numbers or a 2D list of lists.
+    Returns a FloatArray that avoids per-element boxing overhead.
+
+    Parameters:
+        data: List of numbers (1D), list of lists of numbers (2D), or existing FloatArray
+
+    Returns:
+        FloatArray
+    """
+    ...
+
+def shape(a: "FloatArray") -> List[int]:
+    """
+    Return the shape of a FloatArray as a list of ints.
+
+    Parameters:
+        a: FloatArray
+
+    Returns:
+        List of integers representing dimensions
+    """
+    ...
+
+class FloatArray:
+    """
+    Efficient numerical array with 1D and 2D support.
+
+    Created with math.array(). Supports indexing, slicing,
+    assignment, iteration, equality, and membership testing.
+    """
+    def __getitem__(self, index: int) -> Union[float, "FloatArray"]: ...
+    def __len__(self) -> int: ...
+    def __contains__(self, item: float) -> bool: ...
+    def __eq__(self, other: "FloatArray") -> bool: ...
+    def __ne__(self, other: "FloatArray") -> bool: ...
+    def __iter__(self) -> ...: ...
+    def __str__(self) -> str: ...
+    def __bool__(self) -> bool: ...
