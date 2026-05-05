@@ -128,6 +128,7 @@ class OpenAIClient:
         temperature: Optional[float] = None,
         top_p: Optional[float] = None,
         max_tokens: Optional[int] = None,
+        extra_body: Optional[dict[str, Any]] = None,
         timeout: Optional[int] = None
     ) -> dict[str, Any]:
         """
@@ -141,6 +142,7 @@ class OpenAIClient:
             temperature: Sampling temperature (0.0-2.0)
             top_p: Nucleus sampling threshold (0.0-1.0)
             max_tokens: Maximum tokens to generate
+            extra_body: Provider-specific fields to merge into the request body
             timeout: Request timeout in seconds
 
         Returns:
@@ -158,6 +160,7 @@ class OpenAIClient:
         temperature: Optional[float] = None,
         top_p: Optional[float] = None,
         max_tokens: Optional[int] = None,
+        extra_body: Optional[dict[str, Any]] = None,
         timeout: Optional[int] = None
     ) -> ChatStream:
         """
@@ -171,6 +174,7 @@ class OpenAIClient:
             temperature: Sampling temperature (0.0-2.0)
             top_p: Nucleus sampling threshold (0.0-1.0)
             max_tokens: Maximum tokens to generate
+            extra_body: Provider-specific fields to merge into the request body
             timeout: Overall request timeout in seconds
 
         Returns:
@@ -327,6 +331,7 @@ def Client(
     max_tokens: int = 0,
     temperature: Optional[float] = None,
     top_p: Optional[float] = None,
+    headers: Optional[dict[str, str]] = None,
     remote_servers: Optional[list[dict[str, str]]] = None
 ) -> OpenAIClient:
     """
@@ -339,6 +344,7 @@ def Client(
         max_tokens: Default max_tokens for all requests (Claude defaults to 4096 if not set)
         temperature: Default temperature for all requests (0.0-2.0)
         top_p: Default top_p for all requests (0.0-1.0)
+        headers: Extra HTTP headers to include with every AI API request
         remote_servers: List of remote MCP server configs, each with:
             - base_url (str, required): URL of the MCP server
             - namespace (str, optional): Namespace prefix for tools
@@ -356,6 +362,9 @@ def Client(
 
         # LM Studio / Local LLM
         client = Client("http://127.0.0.1:1234/v1")
+
+        # Custom request headers
+        client = Client("", api_key="sk-...", headers={"X-Project": "docs-bot"})
     """
     ...
 
@@ -489,11 +498,11 @@ def tool_round(
     ...
 
 def estimate_tokens(
-    request: Union[str, list[dict[str, Any]], dict[str, Any]],
-    response: dict[str, Any]
+    request: Optional[Union[str, list[dict[str, Any]], dict[str, Any]]],
+    response: Optional[dict[str, Any]] = None
 ) -> dict[str, int]:
     """
-    Estimate token counts for request messages and response.
+    Estimate token counts for request messages and/or response.
 
     Uses a character-based heuristic (~4 characters per token) to provide
     a fast, reproducible approximation of token counts.
@@ -503,7 +512,9 @@ def estimate_tokens(
             - A string (user message)
             - A list of message dicts with "role" and "content" keys
             - A completion request dict with a "messages" key
-        response: The completion response from client.completion() or client.response_create()
+            - None to estimate only response tokens
+        response: The completion response from client.completion() or client.response_create().
+            Use None or omit it to estimate only request tokens.
 
     Returns:
         Dict with token usage estimates:
