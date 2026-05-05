@@ -44,6 +44,7 @@ class Agent:
     max_tokens: int
     compaction_threshold: int
     request_timeout: int
+    extra_body: Optional[dict[str, Any]]
 
     def __init__(
         self,
@@ -55,7 +56,8 @@ class Agent:
         memory: Optional["MemoryStore"] = None,
         max_tokens: int = 32000,
         compaction_threshold: int = 80,
-        request_timeout: int = 300
+        request_timeout: int = 300,
+        extra_body: Optional[dict[str, Any]] = None
     ) -> None:
         """
         Initialize an Agent.
@@ -76,6 +78,8 @@ class Agent:
             request_timeout: Timeout in seconds for each LLM completion request.
                            LLM calls can be slow, especially with tool-calling
                            loops or large contexts. Default: 300
+            extra_body: Optional dict of provider-specific fields to merge into
+                       every request body. Default: None
         """
         ...
 
