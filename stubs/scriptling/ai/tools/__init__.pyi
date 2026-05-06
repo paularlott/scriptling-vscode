@@ -33,8 +33,13 @@ class Registry:
         Parameters:
             name: Tool name (e.g., "read_file")
             description: Tool description for the AI
-            params: Parameter definitions (e.g., {"path": "string", "limit": "integer?"})
-                    Use "?" suffix for optional parameters
+            params: Parameter definitions mapping name to type string.
+                    Accepted types: "string", "integer", "number", "boolean",
+                    "array", "object". Aliases: "int" -> "integer",
+                    "float" -> "number", "str" -> "string", "bool" -> "boolean",
+                    "dict" -> "object", "list" -> "array".
+                    Append "?" to mark a parameter as optional.
+                    Example: {"path": "string", "limit": "int?"}
             handler: Function to execute when tool is called, receives arguments dict
 
         Example:

@@ -38,8 +38,13 @@ class ToolRegistry:
         Parameters:
             name: Tool name (e.g., "read_file")
             description: Tool description for the AI
-            params: Parameter definitions (e.g., {"path": "string", "limit": "integer?"})
-                    Use "?" suffix for optional parameters
+            params: Parameter definitions mapping name to type string.
+                    Accepted types: "string", "integer", "number", "boolean",
+                    "array", "object". Aliases: "int" -> "integer",
+                    "float" -> "number", "str" -> "string", "bool" -> "boolean",
+                    "dict" -> "object", "list" -> "array".
+                    Append "?" to mark a parameter as optional.
+                    Example: {"path": "string", "limit": "int?"}
             handler: Function to execute when tool is called, receives arguments dict
         """
         ...
@@ -197,7 +202,8 @@ class OpenAIClient:
         input: Union[str, list[Any]],
         *,
         system_prompt: Optional[str] = None,
-        background: bool = False
+        background: bool = False,
+        extra_body: Optional[dict[str, Any]] = None
     ) -> dict[str, Any]:
         """
         Create a response using the OpenAI Responses API.
@@ -207,6 +213,7 @@ class OpenAIClient:
             input: Either a string (user message content) or a list of input items
             system_prompt: System prompt to use when input is a string
             background: If true, runs asynchronously and returns immediately
+            extra_body: Provider-specific fields to merge into the request body
 
         Returns:
             Response object with id, status, output, usage, etc.
@@ -251,7 +258,8 @@ class OpenAIClient:
         model: str,
         input: Union[str, list[Any]],
         *,
-        system_prompt: Optional[str] = None
+        system_prompt: Optional[str] = None,
+        extra_body: Optional[dict[str, Any]] = None
     ) -> ResponseStream:
         """
         Stream a response using the Responses API.
@@ -260,6 +268,7 @@ class OpenAIClient:
             model: Model identifier (e.g., "gpt-4o", "gpt-4")
             input: Either a string (user message content) or a list of input items
             system_prompt: System prompt to use when input is a string
+            extra_body: Provider-specific fields to merge into the request body
 
         Returns:
             ResponseStream object with a next() method
