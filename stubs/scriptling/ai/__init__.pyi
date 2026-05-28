@@ -332,6 +332,70 @@ class OpenAIClient:
         """
         ...
 
+    def completion_parallel(
+        self,
+        model: str,
+        messages_list: list[Union[str, list[dict[str, Any]]]],
+        *,
+        max_parallel: int = 1,
+        system_prompt: Optional[str] = None,
+        tools: Optional[list[dict[str, Any]]] = None,
+        temperature: Optional[float] = None,
+        top_p: Optional[float] = None,
+        max_tokens: Optional[int] = None,
+        extra_body: Optional[dict[str, Any]] = None,
+        timeout: Optional[int] = None
+    ) -> list[dict[str, Any]]:
+        """
+        Run multiple chat completions in parallel.
+
+        Parameters:
+            model: Model identifier (e.g., "gpt-4", "gpt-3.5-turbo")
+            messages_list: List of messages, where each element is a string or list of message dicts
+            max_parallel: Maximum number of concurrent requests. Default: 1
+            system_prompt: System prompt to use when messages is a string
+            tools: List of tool schema dicts from ToolRegistry.build()
+            temperature: Sampling temperature (0.0-2.0)
+            top_p: Nucleus sampling threshold (0.0-1.0)
+            max_tokens: Maximum tokens to generate
+            extra_body: Provider-specific fields to merge into the request body
+            timeout: Request timeout in seconds
+
+        Returns:
+            List of response dicts in the same order as messages_list
+        """
+        ...
+
+    def ask_parallel(
+        self,
+        model: str,
+        messages_list: list[Union[str, list[dict[str, Any]]]],
+        *,
+        max_parallel: int = 1,
+        system_prompt: Optional[str] = None,
+        tools: Optional[list[dict[str, Any]]] = None,
+        temperature: Optional[float] = None,
+        top_p: Optional[float] = None,
+        max_tokens: Optional[int] = None
+    ) -> list[str]:
+        """
+        Run multiple ask completions in parallel. Returns text with thinking blocks removed.
+
+        Parameters:
+            model: Model identifier (e.g., "gpt-4", "gpt-3.5-turbo")
+            messages_list: List of messages, where each element is a string or list of message dicts
+            max_parallel: Maximum number of concurrent requests. Default: 1
+            system_prompt: System prompt to use when messages is a string
+            tools: List of tool schema dicts from ToolRegistry.build()
+            temperature: Sampling temperature (0.0-2.0)
+            top_p: Nucleus sampling threshold (0.0-1.0)
+            max_tokens: Maximum tokens to generate
+
+        Returns:
+            List of response text strings in the same order as messages_list
+        """
+        ...
+
 def Client(
     base_url: str,
     *,
@@ -503,6 +567,48 @@ def tool_round(
     Returns:
         Round result dict with assistant_message, content, reasoning, tool_calls, tool_results,
         finish_reason, and timed_out. Non-streaming mode also includes response.
+    """
+    ...
+
+def tool_round_parallel(
+    client: OpenAIClient,
+    model: str,
+    messages_list: list[Union[str, list[dict[str, Any]]]],
+    registry: ToolRegistry,
+    *,
+    max_parallel: int = 1,
+    stream: bool = False,
+    chunk_timeout: Optional[int] = None,
+    on_event: Optional[Callable[[dict[str, Any]], Any]] = None,
+    system_prompt: Optional[str] = None,
+    temperature: Optional[float] = None,
+    top_p: Optional[float] = None,
+    max_tokens: Optional[int] = None,
+    timeout: Optional[int] = None
+) -> list[dict[str, Any]]:
+    """
+    Run multiple tool-enabled completion rounds in parallel.
+
+    Each element of messages_list is processed independently.
+    Tool execution within each round remains sequential.
+
+    Parameters:
+        client: AI client instance
+        model: Model identifier
+        messages_list: List of messages, where each element is a string or message list
+        registry: Tool registry containing schemas and handlers
+        max_parallel: Maximum number of concurrent rounds. Default: 1
+        stream: Use completion_stream() instead of completion()
+        chunk_timeout: Per-chunk timeout in seconds for streaming mode
+        on_event: Optional callback invoked with event dicts while chunks are processed
+        system_prompt: System prompt when messages is a string
+        temperature: Sampling temperature
+        top_p: Nucleus sampling threshold
+        max_tokens: Maximum tokens to generate
+        timeout: Overall request timeout in seconds
+
+    Returns:
+        List of round result dicts in the same order as messages_list
     """
     ...
 
