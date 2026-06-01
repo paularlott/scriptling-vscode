@@ -103,6 +103,19 @@ class ChatStream:
         """
         ...
 
+    def retry(self) -> Optional[dict[str, Any]]:
+        """
+        Get retry metadata for the stream.
+
+        Returns retry metadata if the connection was retried before streaming began,
+        or None if no retries occurred. Blocks until retry metadata is available.
+
+        Returns:
+            Dict with attempts (int), rate_limit_hit (bool), and total_backoff (float),
+            or None if no retries occurred
+        """
+        ...
+
 class ResponseStream:
     """Stream object for Responses API."""
 
@@ -332,6 +345,205 @@ class OpenAIClient:
         """
         ...
 
+    def completion_parallel(
+        self,
+        model: str,
+        messages_list: list[Union[str, list[dict[str, Any]]]],
+        *,
+        max_parallel: int = 1,
+        system_prompt: Optional[str] = None,
+        tools: Optional[list[dict[str, Any]]] = None,
+        temperature: Optional[float] = None,
+        top_p: Optional[float] = None,
+        max_tokens: Optional[int] = None,
+        extra_body: Optional[dict[str, Any]] = None,
+        timeout: Optional[int] = None
+    ) -> list[dict[str, Any]]:
+        """
+        Run multiple chat completions in parallel with adaptive concurrency.
+
+        When a rate limit (429) is detected, parallelism is automatically halved
+        and workers pause briefly. Rate limit retries are handled by the client.
+
+        Parameters:
+            model: Model identifier (e.g., "gpt-4", "gpt-3.5-turbo")
+            messages_list: List of messages, where each element is a string or list of message dicts
+            max_parallel: Maximum number of concurrent requests. Default: 1
+            system_prompt: System prompt to use when messages is a string
+            tools: List of tool schema dicts from ToolRegistry.build()
+            temperature: Sampling temperature (0.0-2.0)
+            top_p: Nucleus sampling threshold (0.0-1.0)
+            max_tokens: Maximum tokens to generate
+            extra_body: Provider-specific fields to merge into the request body
+            timeout: Request timeout in seconds
+
+        Returns:
+            List of response dicts in the same order as messages_list.
+            Each dict may include a "retry" key if retries occurred:
+            {"attempts": int, "rate_limit_hit": bool, "total_backoff": float}
+        """
+        ...
+
+    def ask_parallel(
+        self,
+        model: str,
+        messages_list: list[Union[str, list[dict[str, Any]]]],
+        *,
+        max_parallel: int = 1,
+        system_prompt: Optional[str] = None,
+        tools: Optional[list[dict[str, Any]]] = None,
+        temperature: Optional[float] = None,
+        top_p: Optional[float] = None,
+        max_tokens: Optional[int] = None,
+        extra_body: Optional[dict[str, Any]] = None,
+        timeout: Optional[int] = None
+    ) -> list[str]:
+        """
+        Run multiple ask completions in parallel with adaptive concurrency.
+
+        When a rate limit (429) is detected, parallelism is automatically halved
+        and workers pause briefly. Rate limit retries are handled by the client.
+        Returns text with thinking blocks removed.
+
+        Parameters:
+            model: Model identifier (e.g., "gpt-4", "gpt-3.5-turbo")
+            messages_list: List of messages, where each element is a string or list of message dicts
+            max_parallel: Maximum number of concurrent requests. Default: 1
+            system_prompt: System prompt to use when messages is a string
+            tools: List of tool schema dicts from ToolRegistry.build()
+            temperature: Sampling temperature (0.0-2.0)
+            top_p: Nucleus sampling threshold (0.0-1.0)
+            max_tokens: Maximum tokens to generate
+
+        Returns:
+            List of response text strings in the same order as messages_list
+        """
+        ...
+
+    def Pipeline(
+        self,
+        model: str,
+        *,
+        max_parallel: int = 1,
+        ask: bool = False,
+        system_prompt: Optional[str] = None,
+        tools: Optional[list[dict[str, Any]]] = None,
+        temperature: Optional[float] = None,
+        top_p: Optional[float] = None,
+        max_tokens: Optional[int] = None,
+        extra_body: Optional[dict[str, Any]] = None,
+        timeout: Optional[int] = None
+    ) -> "Pipeline":
+        """
+        Create a streaming completion pipeline.
+
+        Creates a Pipeline that starts processing requests immediately as they are
+        added via add(), up to max_parallel concurrent requests at a time. Call
+        complete() to wait for all results. This allows prompt generation and
+        inference to overlap.
+
+        Parameters:
+            model: Model identifier (e.g., "gpt-4", "gpt-3.5-turbo")
+            max_parallel: Maximum concurrent requests. Default: 1
+            ask: If True, return plain text strings instead of response dicts. Default: False
+            system_prompt: System prompt applied to each string message
+            tools: List of tool schema dicts from ToolRegistry.build()
+            temperature: Sampling temperature (0.0-2.0)
+            top_p: Nucleus sampling threshold (0.0-1.0)
+            max_tokens: Maximum tokens to generate
+            extra_body: Provider-specific fields merged into every request body
+            timeout: Request timeout in seconds
+
+        Returns:
+            Pipeline instance with add() and complete() methods
+
+        Example:
+            pipe = client.Pipeline("gpt-4", max_parallel=4)
+            for row in dataset:
+                pipe.add(build_prompt(row))
+            results = pipe.complete()
+
+            # Ask mode
+            pipe = client.Pipeline("gpt-4", max_parallel=4, ask=True)
+            for q in questions:
+                pipe.add(q)
+            answers = pipe.complete()
+        """
+        ...
+
+class Pipeline:
+    """AI completion pipeline that processes requests as they are added."""
+
+    def add(
+        self,
+        message: Union[str, list[dict[str, Any]]]
+    ) -> None:
+        """
+        Add a message to the pipeline.
+
+        Queues a message for completion. Processing starts immediately as
+        concurrency slots are available; you do not need to wait until
+        complete() is called.
+
+        Accepts the same message formats as completion() and ask():
+          - str: simple user message; system_prompt (if set on the pipeline)
+                 is applied automatically
+          - list: full conversation as [{"role": ..., "content": ...}, ...] dicts;
+                  system_prompt is ignored when a message list is passed
+
+        Parameters:
+            message: User message string, or list of message dicts
+
+        Returns:
+            None
+
+        Example:
+            # String shorthand
+            pipe.add("What is the capital of France?")
+
+            # Full message list
+            pipe.add([
+                {"role": "system", "content": "You are a geography expert."},
+                {"role": "user",   "content": "What is the capital of France?"},
+            ])
+        """
+        ...
+
+    def complete(self) -> list[Any]:
+        """
+        Wait for all queued completions and return results.
+
+        Closes the pipeline to new additions, waits for all in-flight requests
+        to finish, and returns results in the same order as the add() calls.
+
+        complete() may only be called once. Calling add() after complete() raises
+        an error.
+
+        Return value depends on the mode set at pipeline creation:
+          - ask=False (default, completion mode): ordered list of response dicts,
+            same structure as completion(). Access content with
+            result["choices"][0]["message"]["content"].
+          - ask=True (ask mode): ordered list of plain text strings, same as
+            ask(). Thinking blocks are removed.
+
+        Returns:
+            list[dict] in completion mode, list[str] in ask mode
+
+        Example:
+            # Completion mode
+            pipe = client.Pipeline("gpt-4", max_parallel=4)
+            pipe.add("What is 2+2?")
+            results = pipe.complete()
+            print(results[0]["choices"][0]["message"]["content"])
+
+            # Ask mode
+            pipe = client.Pipeline("gpt-4", max_parallel=4, ask=True)
+            pipe.add("What is 2+2?")
+            answers = pipe.complete()
+            print(answers[0])
+        """
+        ...
+
 def Client(
     base_url: str,
     *,
@@ -341,7 +553,11 @@ def Client(
     temperature: Optional[float] = None,
     top_p: Optional[float] = None,
     headers: Optional[dict[str, str]] = None,
-    remote_servers: Optional[list[dict[str, str]]] = None
+    remote_servers: Optional[list[dict[str, str]]] = None,
+    max_retries: int = 3,
+    retry_backoff: float = 1.0,
+    retry_on_rate_limit: bool = True,
+    retry_on_server_error: bool = True
 ) -> OpenAIClient:
     """
     Create a new AI client.
@@ -358,6 +574,10 @@ def Client(
             - base_url (str, required): URL of the MCP server
             - namespace (str, optional): Namespace prefix for tools
             - bearer_token (str, optional): Bearer token for authentication
+        max_retries: Max retries for retryable errors (429, 5xx). Default: 3. Set -1 to disable
+        retry_backoff: Base backoff in seconds between retries. Default: 1.0
+        retry_on_rate_limit: Retry on 429 rate limit errors. Default: True
+        retry_on_server_error: Retry on 5xx server errors. Default: True
 
     Returns:
         Client instance with methods for API calls
@@ -465,44 +685,6 @@ def collect_stream(
     Returns:
         Aggregated result dict with content, reasoning, tool_calls, finish_reason, timed_out,
         assistant_message, and error (only present when timed_out is true)
-    """
-    ...
-
-def tool_round(
-    client: OpenAIClient,
-    model: str,
-    messages: Union[str, list[dict[str, Any]]],
-    registry: ToolRegistry,
-    *,
-    stream: bool = False,
-    chunk_timeout: Optional[int] = None,
-    on_event: Optional[Callable[[dict[str, Any]], Any]] = None,
-    system_prompt: Optional[str] = None,
-    temperature: Optional[float] = None,
-    top_p: Optional[float] = None,
-    max_tokens: Optional[int] = None,
-    timeout: Optional[int] = None
-) -> dict[str, Any]:
-    """
-    Run one tool-enabled completion round and return the assistant message, tool calls, and tool results.
-
-    Parameters:
-        client: AI client instance
-        model: Model identifier
-        messages: User message string or message list
-        registry: Tool registry containing schemas and handlers
-        stream: Use completion_stream() instead of completion()
-        chunk_timeout: Per-chunk timeout in seconds for streaming mode
-        on_event: Optional callback invoked with event dicts while chunks are processed
-        system_prompt: System prompt when messages is a string
-        temperature: Sampling temperature
-        top_p: Nucleus sampling threshold
-        max_tokens: Maximum tokens to generate
-        timeout: Overall request timeout in seconds
-
-    Returns:
-        Round result dict with assistant_message, content, reasoning, tool_calls, tool_results,
-        finish_reason, and timed_out. Non-streaming mode also includes response.
     """
     ...
 

@@ -101,6 +101,66 @@ class MCPClient:
         """
         ...
 
+    def call_tools_parallel(
+        self,
+        calls: list[dict[str, Any]]
+    ) -> list[dict[str, Any]]:
+        """
+        Execute multiple tools concurrently.
+
+        Executes multiple tools in parallel and returns results in the same order
+        as the input list.
+
+        Parameters:
+            calls: List of dicts with "name" (str) and "arguments" (dict) keys
+
+        Returns:
+            List of dicts with "name", "result", and "error" keys.
+            "error" is an empty string on success.
+
+        Example:
+            results = client.call_tools_parallel([
+                {"name": "search", "arguments": {"query": "golang"}},
+                {"name": "weather", "arguments": {"city": "London"}},
+            ])
+            for r in results:
+                if r["error"]:
+                    print("Error:", r["error"])
+                else:
+                    print(r["name"], r["result"])
+        """
+        ...
+
+    def execute_discovered_parallel(
+        self,
+        calls: list[dict[str, Any]]
+    ) -> list[dict[str, Any]]:
+        """
+        Execute multiple discovered tools concurrently.
+
+        Executes multiple discovered tools (found via tool_search) in parallel
+        and returns results in the same order as the input list.
+
+        Parameters:
+            calls: List of dicts with "name" (str) and "arguments" (dict) keys
+
+        Returns:
+            List of dicts with "name", "result", and "error" keys.
+            "error" is an empty string on success.
+
+        Example:
+            results = client.execute_discovered_parallel([
+                {"name": "tool_a", "arguments": {"x": 1}},
+                {"name": "tool_b", "arguments": {"y": 2}},
+            ])
+            for r in results:
+                if r["error"]:
+                    print("Error:", r["error"])
+                else:
+                    print(r["name"], r["result"])
+        """
+        ...
+
 def Client(
     base_url: str,
     *,
