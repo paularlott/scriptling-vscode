@@ -21,7 +21,7 @@ def read_bytes(path: str, offset: int, length: int) -> str:
     """
     ...
 
-def write_bytes(path: str, offset: int, data: str) -> None:
+def write_bytes(path: str, offset: int, data: str, mode: int = 0o644) -> None:
     """
     Write raw bytes at an offset. Creates the file if it does not exist.
 
@@ -29,6 +29,7 @@ def write_bytes(path: str, offset: int, data: str) -> None:
         path: File path to write
         offset: 0-based byte position to start writing
         data: Raw bytes to write
+        mode: Permission bits used when creating a new file
 
     Returns:
         None
