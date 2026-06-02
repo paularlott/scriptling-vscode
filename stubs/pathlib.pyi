@@ -2,7 +2,7 @@
 Scriptling pathlib stubs.
 """
 
-from typing import Tuple
+from typing import List, Tuple
 
 class Path:
     name: str
@@ -65,4 +65,20 @@ class Path:
 
     def write_bytes(self, data: str) -> None:
         """Write bytes to the file."""
+        ...
+
+    def copy(self, target: str) -> "Path":
+        """Copy this file or directory to the target path."""
+        ...
+
+    def rename(self, target: str) -> "Path":
+        """Rename this file or directory to the target path."""
+        ...
+
+    def iterdir(self) -> List["Path"]:
+        """Return a list of Path objects for the directory contents."""
+        ...
+
+    def glob(self, pattern: str) -> List["Path"]:
+        """Return a list of Path objects matching the pattern."""
         ...
