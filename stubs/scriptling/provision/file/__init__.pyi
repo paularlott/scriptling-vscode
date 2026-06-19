@@ -28,7 +28,7 @@ ABSENT: str
 EXISTS: str
 
 
-def ensure(path: str, content: str, mode: int = 0o644) -> str:
+def ensure(path: str, content: str, mode: int = 0o644, create_only: bool = False) -> str:
     """
     Ensure a file exists with the given content.
 
@@ -36,10 +36,15 @@ def ensure(path: str, content: str, mode: int = 0o644) -> str:
     same content, it is left unchanged. Otherwise the file is written with the
     specified mode.
 
+    When create_only is True, an existing file is never modified: the call
+    returns file.UNCHANGED without writing, even if the content differs. New
+    files are still written normally.
+
     Parameters:
         path: Path to the file (supports ~ expansion)
         content: File contents
         mode: File permission mode (default 0o644)
+        create_only: If True, never modify an existing file (default False)
 
     Returns:
         file.CREATED, file.UPDATED, or file.UNCHANGED
