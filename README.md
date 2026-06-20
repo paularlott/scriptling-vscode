@@ -14,6 +14,7 @@ Scriptling is a Python-like scripting language for LLM agents. This extension en
 - **scriptling.ai.tools** - AI tool registry and utilities
 - **scriptling.ai.memory** - AI memory/context management
 - **scriptling.console** - Console output and formatting utilities
+- **scriptling.provision** - Provisioning utilities for files and fetched artifacts
 - **scriptling.runtime** - Runtime environment APIs (http, kv, sync, sandbox)
 - **scriptling.toon** - Animation utilities
 - **scriptling.wait_for** - Async wait utilities

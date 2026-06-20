@@ -1,7 +1,7 @@
 {
   "name": "scriptling",
   "displayName": "Scriptling Language Support",
-  "description": "IntelliSense and language support for Scriptling extension libraries (ai, mcp, similarity, agent)",
+  "description": "IntelliSense and language support for Scriptling extension libraries (ai, mcp, provision, similarity, agent)",
   "version": "0.5.3",
   "publisher": "paularlott",
   "license": "MIT",
