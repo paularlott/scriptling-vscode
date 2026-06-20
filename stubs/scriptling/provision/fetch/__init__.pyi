@@ -30,6 +30,7 @@ def file(
     insecure: bool = False,
     unpack_zip: bool = False,
     timeout: int = 30,
+    max_bytes: int = 0,
     mode: int = 0o644,
     dir_mode: int = 0o755,
 ) -> dict[str, Any]:
@@ -46,6 +47,7 @@ def file(
         insecure: If True, skip HTTPS certificate verification (default False)
         unpack_zip: If True, unpack the fetched body as a ZIP archive (default False)
         timeout: Request timeout in seconds (default 30)
+        max_bytes: Maximum response size in bytes, or 0 for no cap (default 0)
         mode: File permission mode for created files (default 0o644)
         dir_mode: Directory permission mode for created directories (default 0o755)
 
