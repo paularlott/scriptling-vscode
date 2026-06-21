@@ -33,6 +33,7 @@ def file(
     max_bytes: int = 0,
     mode: int = 0o644,
     dir_mode: int = 0o755,
+    provides: list[str] = None,
 ) -> dict[str, Any]:
     """
     Fetch a file over HTTP or HTTPS.
@@ -50,6 +51,8 @@ def file(
         max_bytes: Maximum response size in bytes, or 0 for no cap (default 0)
         mode: File permission mode for created files (default 0o644)
         dir_mode: Directory permission mode for created directories (default 0o755)
+        provides: List of file paths to check before fetching. If all paths exist,
+            returns UNCHANGED without downloading or extracting (default None)
 
     Returns:
         A dict with status, url, path, bytes, unpacked, and files keys.
