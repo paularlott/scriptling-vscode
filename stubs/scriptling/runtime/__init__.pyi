@@ -6,7 +6,7 @@ KV store, concurrency primitives, and sandboxed execution.
 
 Sub-libraries:
   - runtime.http: HTTP server route registration and response helpers
-  - runtime.jsonrpc: Concurrent stdio JSON-RPC 2.0 server
+  - runtime.jsonrpc: Concurrent JSON-RPC 2.0 server over stdio or HTTP
   - runtime.kv: Thread-safe key-value store
   - runtime.sync: Concurrency primitives (WaitGroup, Queue, Atomic, Shared)
   - runtime.sandbox: Isolated script execution environments

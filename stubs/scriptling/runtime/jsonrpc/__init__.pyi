@@ -1,9 +1,11 @@
 """
 Scriptling Runtime JSON-RPC Library - Type stubs for IntelliSense support.
 
-Concurrent stdio JSON-RPC 2.0 server method and notification registration.
+Concurrent JSON-RPC 2.0 server method and notification registration.
 Handlers are referenced by string ("library.function") and run on a fresh,
-isolated evaluator per request, matching runtime.http.
+isolated evaluator per request, matching runtime.http. The server runs over
+stdio with ``scriptling --json-rpc setup.py`` or over HTTP at ``POST /json-rpc``
+with ``scriptling --server :8000 --json-rpc setup.py``.
 """
 
 from typing import Any, Optional
@@ -56,7 +58,8 @@ def notification(name: str, handler: str) -> None:
         handler: Handler function as "library.function" string
 
     Notifications are JSON-RPC requests without an id. The handler receives
-    the decoded params but no response is written. Return values are ignored.
+    the decoded params but no response is written. HTTP notification-only
+    requests return 204 No Content. Return values are ignored.
 
     Example:
         import scriptling.runtime as runtime
