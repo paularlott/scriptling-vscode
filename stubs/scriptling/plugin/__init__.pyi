@@ -44,10 +44,11 @@ def call_function(library: str, name: str, *args: Any, **kwargs: Any) -> Any:
       typed plugin transport values. Arguments and return values preserve
       int/float distinction.
     * **Raw JSON-RPC** (``scriptling=False``, the default): sends the function
-      name directly as the JSON-RPC method. A single dict positional arg
-      becomes the ``params`` object; multiple positional args become a
-      ``params`` array; kwargs become a ``params`` object. Return values are
-      raw JSON (numbers come back as floats).
+      name directly as the JSON-RPC method. If kwargs are present they become
+      the ``params`` object (positional args are ignored); otherwise a single
+      positional arg becomes ``params`` directly (any type — dict, list,
+      string, number, etc.); multiple positional args become a ``params``
+      array. Return values are raw JSON (numbers come back as floats).
 
     Parameters:
         library: Plugin library name -- short (``"widgets"``) or normalised
