@@ -36,6 +36,7 @@ class Promise:
         """
         ...
 
+
 def background(
     name: str,
     handler: str,
@@ -54,6 +55,11 @@ def background(
         handler: Function name to execute (e.g., "my_task" or "lib.function")
         *args: Positional arguments to pass to the function
         **kwargs: Keyword arguments to pass to the function
+        shared (bool, default False): when True, run the handler in the caller's
+            OWN environment, sharing its live variables. The interpreter lock
+            serializes script execution so shared access is safe without locks,
+            and arguments are passed live (no transferable restriction). When
+            False (default) the handler runs in an isolated, parallel copy.
 
     Returns:
         Promise object (in script mode) or None (in server mode)
@@ -67,5 +73,11 @@ def background(
         promise = background("calc", "my_task", 10, 5, operation="multiply")
         if promise:
             result = promise.get()  # Returns 50
+
+        # Shared-environment thread over live state:
+        state = {"n": 0}
+        def worker():
+            state["n"] = state["n"] + 1
+        background("w", "worker", shared=True).wait()
     """
     ...

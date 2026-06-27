@@ -393,5 +393,11 @@ def set_progress(label: str, pct: float) -> None:
 def run() -> None:
     """
     Start the console event loop (blocks until exit).
+
+    on_submit, on_escape, and register_command handlers run on a single thread,
+    one at a time - they never run concurrently, so no locks are needed around
+    shared state. A long-running handler delays the next one; submitting new
+    input or pressing Esc cancels the in-flight handler so cooperative handlers
+    can stop early.
     """
     ...
