@@ -37,6 +37,50 @@ class Promise:
         ...
 
 
+def start_server(wait: bool = True) -> None:
+    """
+    Signal the server to start accepting requests.
+
+    Call after all routes and methods are registered. The server collects
+    registered routes/methods and begins listening for connections.
+
+    Parameters:
+        wait: If True (default), blocks until the server shuts down.
+              If False, returns immediately so the script can keep
+              running alongside the server.
+
+    Backward compatible: scripts that exit without calling start_server()
+    still work — the server starts automatically after the setup script
+    finishes.
+
+    Example (blocking, equivalent to Flask app.run()):
+        runtime.http.get("/hello", "hello_handler")
+        runtime.start_server()
+
+    Example (non-blocking, script stays alive):
+        runtime.http.get("/hello", "hello_handler")
+        runtime.start_server(wait=False)
+        while runtime.server_running():
+            yield_now()
+    """
+    ...
+
+
+def server_running() -> bool:
+    """
+    Returns True while the server is running.
+
+    Returns False once the server receives a shutdown signal, or when
+    called outside of server mode.
+
+    Typical usage with start_server(wait=False):
+        runtime.start_server(wait=False)
+        while runtime.server_running():
+            yield_now()
+    """
+    ...
+
+
 def background(
     name: str,
     handler: str,
