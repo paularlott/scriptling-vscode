@@ -161,44 +161,62 @@ class MCPClient:
         """
         ...
 
+    def close(self) -> None:
+        """
+        Close the client and release its transport.
+
+        For a stdio client this shuts down the launched server subprocess;
+        for an HTTP client it is a no-op. Safe to call more than once.
+
+        Example:
+            client.close()
+        """
+        ...
+
 def Client(
-    base_url: str,
+    target: str,
     *,
     namespace: str = "",
-    bearer_token: str = ""
+    bearer_token: str = "",
+    args: Optional[list[str]] = None
 ) -> MCPClient:
     """
-    Create a new MCP client.
+    Create a new MCP client, over HTTP or stdio.
 
-    Creates a new MCP client for connecting to a remote MCP server.
+    The transport is chosen from `target`: an "http://" or "https://" URL
+    connects over HTTP; any other value is treated as a local executable that
+    is launched as a stdio MCP server subprocess.
 
     Parameters:
-        base_url: URL of the MCP server
-        namespace: Namespace for tool names (e.g., "scriptling" makes tools
-                   available as "scriptling/tool_name")
-        bearer_token: Bearer token for authentication
+        target: HTTP(S) URL of the server, or path/command of a stdio server
+        namespace: Namespace prefixed to tool names (e.g. "t1" exposes
+                   "search" as "t1__search")
+        bearer_token: Bearer token for authentication (HTTP only)
+        args: Command-line arguments for the stdio server (stdio only)
+
+    Passing `args` with an HTTP URL, or `bearer_token` with a command, raises
+    an error.
 
     Returns:
-        Client instance with methods for interacting with the server
+        Client instance with methods for interacting with the server. For
+        stdio clients, call close() when done to shut the subprocess down.
 
     Example:
-        # Without namespace or auth
-        client = Client("https://api.example.com/mcp")
-
-        # With namespace only
-        client = Client("https://api.example.com/mcp", namespace="scriptling")
-
-        # With bearer token only
-        client = Client("https://api.example.com/mcp", bearer_token="secret")
-
-        # With both namespace and bearer token
+        # HTTP server
         client = Client("https://api.example.com/mcp",
                        namespace="scriptling",
                        bearer_token="secret")
 
+        # stdio server (a local executable)
+        client = Client("/usr/local/bin/thebinary", args=["--server"], namespace="t1")
+
+        # Scriptling itself can be a stdio MCP server
+        client = Client("scriptling", args=["--mcp-exec-script"], namespace="local")
+
         tools = client.tools()
         for tool in tools:
             print(tool.name)
+        client.close()
     """
     ...
 
