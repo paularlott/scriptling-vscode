@@ -161,6 +161,87 @@ class MCPClient:
         """
         ...
 
+    def list_resources(self) -> list[dict[str, Any]]:
+        """
+        List static resources exposed by the server.
+
+        Returns:
+            List of resource dicts with uri, name, description, mimeType
+
+        Example:
+            for res in client.list_resources():
+                print(res["uri"], res["name"])
+        """
+        ...
+
+    def list_resource_templates(self) -> list[dict[str, Any]]:
+        """
+        List resource templates exposed by the server.
+
+        Resource templates have a {var} URI placeholder the client expands
+        before reading with read_resource().
+
+        Returns:
+            List of dicts with uriTemplate, name, description, mimeType
+
+        Example:
+            for t in client.list_resource_templates():
+                print(t["uriTemplate"], t["name"])
+        """
+        ...
+
+    def read_resource(self, uri: str) -> Any:
+        """
+        Read a resource by URI (static or expanded from a template).
+
+        Parameters:
+            uri: The resource URI to read
+
+        Returns:
+            A content dict (uri, mimeType, text|blob), or a list of them.
+            text is parsed JSON when valid, else a plain string.
+
+        Example:
+            data = client.read_resource("config://app")
+            print(data["text"])
+        """
+        ...
+
+    def list_prompts(self) -> list[dict[str, Any]]:
+        """
+        List prompts exposed by the server.
+
+        Returns:
+            List of prompt dicts with name, description, and arguments
+            (each argument: name, description, required)
+
+        Example:
+            for p in client.list_prompts():
+                print(p["name"], p["description"])
+        """
+        ...
+
+    def get_prompt(self, name: str, arguments: dict[str, Any]) -> dict[str, Any]:
+        """
+        Render a prompt by name into messages for the model.
+
+        Prompt arguments are always strings; non-string values are coerced.
+
+        Parameters:
+            name: Prompt name
+            arguments: Argument values
+
+        Returns:
+            dict with "description" and "messages" (a list of
+            {"role": ..., "content": ...})
+
+        Example:
+            out = client.get_prompt("write_script", {"task": "greet a user"})
+            for m in out["messages"]:
+                print(m["role"], m["content"])
+        """
+        ...
+
     def close(self) -> None:
         """
         Close the client and release its transport.
