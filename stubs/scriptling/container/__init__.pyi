@@ -245,6 +245,29 @@ class ContainerClient:
         """
         ...
 
+    def wait_stopped(self, name_or_id: str, *, timeout: int = 30) -> bool:
+        """
+        Wait for a container to reach a stopped state.
+
+        Polls the container's running state until it stops or the timeout
+        elapses. Useful after stop() to confirm the container has fully
+        stopped, and safe to call on containers that no longer exist
+        (treated as already stopped).
+
+        Parameters:
+            name_or_id (str): Container name or ID
+            timeout (int, optional): Maximum time to wait in seconds (default 30)
+
+        Returns:
+            bool: True if the container is stopped, False if the timeout was reached
+
+        Example:
+            c.stop("web")
+            if not c.wait_stopped("web", timeout=15):
+                print("container did not stop in time")
+        """
+        ...
+
     def remove(self, name_or_id: str) -> None:
         """
         Remove a stopped container.
