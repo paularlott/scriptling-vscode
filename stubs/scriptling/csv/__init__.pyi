@@ -7,7 +7,7 @@ CSV parsing and formatting (string-based, no filesystem access).
 from typing import Optional
 
 
-def parse(content: str, *, delimiter: str = ",") -> list[list[str]]:
+def loads(content: str, *, delimiter: str = ",") -> list[list[str]]:
     """
     Parse a CSV string into a list of rows.
 
@@ -23,7 +23,7 @@ def parse(content: str, *, delimiter: str = ",") -> list[list[str]]:
     ...
 
 
-def parse_dict(content: str, *, delimiter: str = ",") -> list[dict]:
+def loads_dict(content: str, *, delimiter: str = ",") -> list[dict]:
     """
     Parse CSV text into a list of dicts. First row is treated as headers.
 
@@ -37,7 +37,7 @@ def parse_dict(content: str, *, delimiter: str = ",") -> list[dict]:
     ...
 
 
-def format(rows: list[list[str]], *, delimiter: str = ",") -> str:
+def dumps(rows: list[list[str]], *, delimiter: str = ",") -> str:
     """
     Format a list of lists into CSV text.
 
@@ -53,7 +53,7 @@ def format(rows: list[list[str]], *, delimiter: str = ",") -> str:
     ...
 
 
-def format_dict(
+def dumps_dict(
     rows: list[dict],
     *,
     delimiter: str = ",",
