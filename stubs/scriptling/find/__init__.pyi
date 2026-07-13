@@ -1,0 +1,69 @@
+"""
+Scriptling Find Library - Type stubs for IntelliSense support.
+
+Find files and directories by name, type, modification time, and size —
+similar in spirit to the Unix find command.
+"""
+
+from typing import List, Optional
+
+
+def path(
+    path: str,
+    *,
+    recursive: bool = True,
+    type: str = "any",
+    name: str = "",
+    mtime_min: Optional[float] = None,
+    mtime_max: Optional[float] = None,
+    size_min: Optional[int] = None,
+    size_max: Optional[int] = None,
+    include_hidden: bool = False,
+    follow_links: bool = False,
+    max_depth: Optional[int] = None,
+) -> List[str]:
+    """
+    Find files and directories under a path by name, type, modification time,
+    and size. Returns matching paths as a list of strings in arbitrary order.
+
+    Recursive searches stat and filter entries concurrently using a bounded
+    worker pool, the same model as scriptling.grep.
+
+    Parameters:
+        path           Directory (or file) to search under
+        recursive      Descend into subdirectories (default: True). When False,
+                       only the immediate children of path are examined.
+        type           Restrict to "file", "dir", or "any" (default: "any")
+        name           Shell-style glob pattern matched against the entry's base
+                       name, e.g. "*.md". Empty matches everything (default).
+        mtime_min      Include only entries modified at or after this epoch time
+                       (float seconds). None = no lower bound (default).
+        mtime_max      Include only entries modified at or before this epoch time
+                       (float seconds). None = no upper bound (default).
+        size_min       Include only entries whose size in bytes is >= this value.
+                       None = no lower bound (default).
+        size_max       Include only entries whose size in bytes is <= this value.
+                       None = no upper bound (default).
+        include_hidden When True, entries whose name starts with "." are matched;
+                       when False (the default) they are skipped.
+        follow_links   Follow symlinks if they resolve within allowed paths
+                       (default: False)
+        max_depth      Maximum recursion depth (1 = immediate children only).
+                       None = unlimited (default).
+
+    Returns:
+        List of matching path strings.
+
+    Example:
+        import scriptling.find as find
+        import time
+
+        # Markdown files modified in the last 24 hours
+        recent = find.path("/docs", name="*.md", type="file",
+                           mtime_min=time.time() - 86400)
+
+        # Large log files (> 100 MiB)
+        big = find.path("/var/log", name="*.log", type="file",
+                        size_min=100 * 1024 * 1024)
+    """
+    ...
