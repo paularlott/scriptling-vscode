@@ -199,3 +199,57 @@ def minhash_similarity(a: list[int], b: list[int]) -> float:
         sim = similarity.minhash_similarity(sig1, sig2)
     """
     ...
+
+
+def cosine_similarity(a: list[float], b: list[float]) -> float:
+    """
+    Compare two numeric vectors using cosine similarity.
+
+    Returns a score from -1.0 (opposite) to 1.0 (identical). Works with
+    embedding vectors from ai.client.embedding() or vectors from vectorize().
+
+    Parameters:
+        a  First vector (list of numbers)
+        b  Second vector (same length as a)
+
+    Returns:
+        Cosine similarity score from -1.0 to 1.0
+    """
+    ...
+
+
+def most_similar(
+    query: list[float],
+    vectors: list[list[float]],
+    top_k: int = 5,
+) -> list[dict]:
+    """
+    Rank vectors by cosine similarity to a query vector.
+
+    Parameters:
+        query    Query vector (list of numbers)
+        vectors  List of candidate vectors
+        top_k    Maximum results to return (default 5)
+
+    Returns:
+        List of dicts sorted by descending score:
+        [{"index": int, "score": float}, ...]
+    """
+    ...
+
+
+def vectorize(text: str, *, dims: int = 256) -> list[float]:
+    """
+    Generate a vector from text using the feature-hashing trick (CPU-only).
+
+    No model or API call required. Each word is hashed to a dimension with
+    a +1/-1 sign, then L2-normalised. Similar texts produce similar vectors.
+
+    Parameters:
+        text  Text to vectorise
+        dims  Output dimension (default 256)
+
+    Returns:
+        Normalised vector of length dims.
+    """
+    ...
