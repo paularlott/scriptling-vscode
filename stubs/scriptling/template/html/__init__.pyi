@@ -50,9 +50,15 @@ class Set:
         ...
 
 
-def Set() -> Set:
+def Set(*, left: str = "{{", right: str = "}}") -> Set:
     """
     Create a new HTML template set (uses html/template with auto-escaping).
+
+    Parameters:
+        left: Left action delimiter (default "{{"). Pass an empty string to
+            keep the default.
+        right: Right action delimiter (default "}}"). Pass an empty string to
+            keep the default.
 
     Returns:
         Set: A template set
@@ -70,6 +76,11 @@ def Set() -> Set:
         tmpl.add('{{define "header"}}<h1>{{.Title}}</h1>{{end}}')
         tmpl.add('{{define "page"}}{{template "header" .}}<p>{{.Body}}</p>{{end}}')
         print(tmpl.render("page", {"Title": "Home", "Body": "Welcome"}))
+
+        # Custom delimiters, e.g. to keep {{ }} literally in the output
+        tmpl = html.Set(left="{%", right="%}")
+        tmpl.add("<p>{%.Name%} {{ user.tag }}</p>")
+        print(tmpl.render({"Name": "Alice"}))
 
         # From file
         import os

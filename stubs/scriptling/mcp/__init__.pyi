@@ -259,7 +259,8 @@ def Client(
     *,
     namespace: str = "",
     bearer_token: str = "",
-    args: Optional[list[str]] = None
+    args: Optional[list[str]] = None,
+    env: Optional[list[str]] = None
 ) -> MCPClient:
     """
     Create a new MCP client, over HTTP or stdio.
@@ -274,9 +275,11 @@ def Client(
                    "search" as "t1__search")
         bearer_token: Bearer token for authentication (HTTP only)
         args: Command-line arguments for the stdio server (stdio only)
+        env: Extra KEY=value environment variables for the stdio subprocess
+             (stdio only); merged on top of the inherited environment
 
-    Passing `args` with an HTTP URL, or `bearer_token` with a command, raises
-    an error.
+    Passing `args` or `env` with an HTTP URL, or `bearer_token` with a command,
+    raises an error.
 
     Returns:
         Client instance with methods for interacting with the server. For
@@ -290,6 +293,9 @@ def Client(
 
         # stdio server (a local executable)
         client = Client("/usr/local/bin/thebinary", args=["--server"], namespace="t1")
+
+        # stdio server with extra environment variables
+        client = Client("npx", args=["-y", "@modelcontextprotocol/server-filesystem", "/data"], env=["FS_ROOT=/data", "LOG_LEVEL=debug"])
 
         # Scriptling itself can be a stdio MCP server
         client = Client("scriptling", args=["--mcp-exec-script"], namespace="local")

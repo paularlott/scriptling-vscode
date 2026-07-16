@@ -50,9 +50,15 @@ class Set:
         ...
 
 
-def Set() -> Set:
+def Set(*, left: str = "{{", right: str = "}}") -> Set:
     """
     Create a new text template set (uses text/template, no HTML escaping).
+
+    Parameters:
+        left: Left action delimiter (default "{{"). Pass an empty string to
+            keep the default.
+        right: Right action delimiter (default "}}"). Pass an empty string to
+            keep the default.
 
     Returns:
         Set: A template set
@@ -70,6 +76,11 @@ def Set() -> Set:
         tmpl.add('{{define "greeting"}}Hello, {{.Name}}!{{end}}')
         tmpl.add('{{define "email"}}{{template "greeting" .}}\\n\\nYour order is ready.{{end}}')
         print(tmpl.render("email", {"Name": "Alice"}))
+
+        # Custom delimiters, e.g. to keep {{ }} literally in the output
+        tmpl = text.Set(left="{%", right="%}")
+        tmpl.add("Hello, {%.Name%}! Config: {{ service.tag }}")
+        print(tmpl.render({"Name": "Alice"}))
 
         # From file
         import os
