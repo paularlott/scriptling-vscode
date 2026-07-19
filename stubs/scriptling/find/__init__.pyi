@@ -5,7 +5,16 @@ Find files and directories by name, type, modification time, and size —
 similar in spirit to the Unix find command.
 """
 
-from typing import List, Optional
+from typing import List, Optional, TypedDict
+
+
+class FindEntry(TypedDict):
+    """A single matching entry returned by find.entries()."""
+
+    path: str
+    size: int
+    mtime: float
+    is_dir: bool
 
 
 def path(
@@ -65,5 +74,47 @@ def path(
         # Large log files (> 100 MiB)
         big = find.path("/var/log", name="*.log", type="file",
                         size_min=100 * 1024 * 1024)
+    """
+    ...
+
+
+def entries(
+    path: str,
+    *,
+    recursive: bool = True,
+    type: str = "any",
+    name: str = "",
+    mtime_min: Optional[float] = None,
+    mtime_max: Optional[float] = None,
+    size_min: Optional[int] = None,
+    size_max: Optional[int] = None,
+    include_hidden: bool = False,
+    follow_links: bool = False,
+    max_depth: Optional[int] = None,
+) -> List[FindEntry]:
+    """
+    Find files and directories under a path by name, type, modification time,
+    and size, returning a list of dicts carrying each match's path, size,
+    mtime, and is_dir flag. Use this when you need the metadata to compare
+    trees without re-reading bytes; use path() when only the strings are
+    needed, as path() skips the stat in the no-filter common case.
+
+    Parameters are the same as path(). Each entry dict has the keys:
+        path    str   - the matching entry's path
+        size    int   - size in bytes (0 for directories)
+        mtime   float - modification time as epoch seconds
+        is_dir  bool  - True when the entry is a directory
+
+    Paths are returned in arbitrary order. Recursive searches stat and filter
+    entries concurrently using a bounded worker pool, the same model as
+    scriptling.grep.
+
+    Example:
+        import scriptling.find as find
+        import time
+
+        # Sync-relevant metadata: every markdown file with its size and mtime
+        for e in find.entries("/docs", name="*.md", type="file"):
+            print(e["path"], e["size"], e["mtime"])
     """
     ...
