@@ -66,3 +66,7 @@ def removedirs(name: str) -> None:
 def rename(old: str, new: str) -> None:
     """Rename a file or directory."""
     ...
+
+def symlink(src: str, dst: str) -> None:
+    """Create a symbolic link named dst that points to src."""
+    ...

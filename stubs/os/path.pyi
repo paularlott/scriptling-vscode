@@ -20,6 +20,11 @@ def isdir(path: str) -> bool:
     """Return True if path is a directory."""
     ...
 
+def islink(path: str) -> bool:
+    """Return True if path is a symbolic link. Uses Lstat so the link itself
+    is checked, not the target it points to."""
+    ...
+
 def basename(path: str) -> str:
     """Return the final path component."""
     ...

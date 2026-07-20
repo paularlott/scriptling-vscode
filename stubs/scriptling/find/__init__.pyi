@@ -15,6 +15,9 @@ class FindEntry(TypedDict):
     size: int
     mtime: float
     is_dir: bool
+    file_perm: Optional[int]
+    hash: Optional[str]
+    link_target: Optional[str]
 
 
 def path(
@@ -91,6 +94,9 @@ def entries(
     include_hidden: bool = False,
     follow_links: bool = False,
     max_depth: Optional[int] = None,
+    include_metadata: bool = False,
+    include_hash: bool = False,
+    include_symlinks: bool = False,
 ) -> List[FindEntry]:
     """
     Find files and directories under a path by name, type, modification time,
@@ -99,11 +105,22 @@ def entries(
     trees without re-reading bytes; use path() when only the strings are
     needed, as path() skips the stat in the no-filter common case.
 
-    Parameters are the same as path(). Each entry dict has the keys:
+    Parameters are the same as path(), plus:
+        include_metadata When True, file_perm is populated (extracted from the
+                         entry stat, no extra syscall).
+        include_hash     When True, each file is crc64-hashed and the hex
+                         checksum is returned in the hash field.
+        include_symlinks When True, symlink entries are yielded with their
+                         link_target instead of being followed.
+
+    Each entry dict has the keys:
         path    str   - the matching entry's path
         size    int   - size in bytes (0 for directories)
         mtime   float - modification time as epoch seconds
         is_dir  bool  - True when the entry is a directory
+        file_perm int? - file permission bits (None unless include_metadata)
+        hash    str?  - hex-encoded crc64 checksum (None unless include_hash)
+        link_target str? - symlink target (None unless include_symlinks)
 
     Paths are returned in arbitrary order. Recursive searches stat and filter
     entries concurrently using a bounded worker pool, the same model as
@@ -116,5 +133,14 @@ def entries(
         # Sync-relevant metadata: every markdown file with its size and mtime
         for e in find.entries("/docs", name="*.md", type="file"):
             print(e["path"], e["size"], e["mtime"])
+
+        # Hash-based change detection
+        for e in find.entries("/site", include_hash=True, type="file"):
+            print(e["path"], e["hash"])
+
+        # Detect symbolic links without following them
+        for e in find.entries("/project", include_symlinks=True):
+            if e["link_target"]:
+                print(e["path"], "->", e["link_target"])
     """
     ...
