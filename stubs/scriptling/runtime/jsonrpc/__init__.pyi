@@ -8,7 +8,9 @@ stdio with ``scriptling --json-rpc setup.py`` or over HTTP at ``POST /json-rpc``
 with ``scriptling --server :8000 --json-rpc setup.py``.
 """
 
-from typing import Any, Optional
+from typing import Any, Optional, Callable, overload, TypeVar
+
+F = TypeVar('F', bound=Callable[..., Any])
 
 
 class JSONRPCError:
@@ -29,42 +31,51 @@ class JSONRPCError:
     data: Any
 
 
-def method(name: str, handler: str) -> None:
+@overload
+def method(name: str) -> Callable[[F], F]: ...
+@overload
+def method(name: str, handler: str) -> None: ...
+def method(name: str, handler: str = ...) -> Optional[Callable[[F], F]]:
     """
-    Register a JSON-RPC method handler.
+    Register a JSON-RPC method handler, or use as decorator.
 
-    Parameters:
-        name: JSON-RPC method name
-        handler: Handler function as "library.function" string
+    Decorator form::
 
-    The handler receives the decoded JSON-RPC params as its single argument
-    and returns a JSON-compatible result. Raise an exception or return
-    runtime.jsonrpc.error(...) to produce an error response.
+        @jsonrpc.method("echo")
+        def echo(params):
+            return params
 
-    Example:
-        import scriptling.runtime as runtime
+    Imperative form::
 
         runtime.jsonrpc.method("echo", "handlers.echo")
+
+    The handler receives the decoded JSON-RPC params as its single argument
+    and returns a JSON-compatible result. Return runtime.jsonrpc.error(...)
+    to produce an error response.
     """
     ...
 
 
-def notification(name: str, handler: str) -> None:
+@overload
+def notification(name: str) -> Callable[[F], F]: ...
+@overload
+def notification(name: str, handler: str) -> None: ...
+def notification(name: str, handler: str = ...) -> Optional[Callable[[F], F]]:
     """
-    Register a JSON-RPC notification handler.
+    Register a JSON-RPC notification handler, or use as decorator.
 
-    Parameters:
-        name: JSON-RPC notification name
-        handler: Handler function as "library.function" string
+    Decorator form::
 
-    Notifications are JSON-RPC requests without an id. The handler receives
-    the decoded params but no response is written. HTTP notification-only
-    requests return 204 No Content. Return values are ignored.
+        @jsonrpc.notification("progress")
+        def on_progress(params):
+            pass
 
-    Example:
-        import scriptling.runtime as runtime
+    Imperative form::
 
         runtime.jsonrpc.notification("progress", "handlers.on_progress")
+
+    Notifications are JSON-RPC requests without an id. The handler receives
+    the decoded params but no response is written.
     """
     ...
 

@@ -5,7 +5,9 @@ HTTP server route registration and response helpers for building
 web servers and APIs.
 """
 
-from typing import Optional, Any, Callable, Union
+from typing import Optional, Any, Callable, Union, overload, TypeVar
+
+F = TypeVar('F', bound=Callable[..., Any])
 
 class Request:
     """
@@ -34,89 +36,91 @@ class Request:
         """
         ...
 
-def get(path: str, handler: str) -> None:
+@overload
+def get(path: str) -> Callable[[F], F]: ...
+@overload
+def get(path: str, handler: str) -> None: ...
+def get(path: str, handler: str = ...) -> Optional[Callable[[F], F]]:
     """
-    Register a GET route.
+    Register a GET route, or use as decorator.
 
-    Parameters:
-        path: URL path for the route (e.g., "/api/users")
-        handler: Handler function as "library.function" string
+    Decorator form::
 
-    Example:
+        @http.get("/health")
+        def health(request):
+            return http.json(200, {"status": "ok"})
+
+    Imperative form::
+
         runtime.http.get("/health", "handlers.health_check")
     """
     ...
 
-def post(path: str, handler: str) -> None:
-    """
-    Register a POST route.
-
-    Parameters:
-        path: URL path for the route
-        handler: Handler function as "library.function" string
-
-    Example:
-        runtime.http.post("/webhook", "handlers.webhook")
-    """
+@overload
+def post(path: str) -> Callable[[F], F]: ...
+@overload
+def post(path: str, handler: str) -> None: ...
+def post(path: str, handler: str = ...) -> Optional[Callable[[F], F]]:
+    """Register a POST route, or use as decorator."""
     ...
 
-def put(path: str, handler: str) -> None:
-    """
-    Register a PUT route.
-
-    Parameters:
-        path: URL path for the route
-        handler: Handler function as "library.function" string
-
-    Example:
-        runtime.http.put("/resource", "handlers.update_resource")
-    """
+@overload
+def put(path: str) -> Callable[[F], F]: ...
+@overload
+def put(path: str, handler: str) -> None: ...
+def put(path: str, handler: str = ...) -> Optional[Callable[[F], F]]:
+    """Register a PUT route, or use as decorator."""
     ...
 
-def delete(path: str, handler: str) -> None:
-    """
-    Register a DELETE route.
-
-    Parameters:
-        path: URL path for the route
-        handler: Handler function as "library.function" string
-
-    Example:
-        runtime.http.delete("/resource", "handlers.delete_resource")
-    """
+@overload
+def delete(path: str) -> Callable[[F], F]: ...
+@overload
+def delete(path: str, handler: str) -> None: ...
+def delete(path: str, handler: str = ...) -> Optional[Callable[[F], F]]:
+    """Register a DELETE route, or use as decorator."""
     ...
 
-def route(
-    path: str,
-    handler: str,
-    methods: list[str] = ["GET", "POST", "PUT", "DELETE"]
-) -> None:
+@overload
+def route(path: str, *, methods: list[str] = ...) -> Callable[[F], F]: ...
+@overload
+def route(path: str, handler: str, methods: list[str] = ...) -> None: ...
+def route(path: str, handler: str = ..., methods: list[str] = ...) -> Optional[Callable[[F], F]]:
     """
-    Register a route for multiple methods.
+    Register a route for multiple methods, or use as decorator.
 
-    Parameters:
-        path: URL path for the route
-        handler: Handler function as "library.function" string
-        methods: List of HTTP methods to accept
+    Decorator form::
 
-    Example:
+        @http.route("/api", methods=["GET", "POST"])
+        def handler(request):
+            ...
+
+    Imperative form::
+
         runtime.http.route("/api", "handlers.api", methods=["GET", "POST"])
     """
     ...
 
-def middleware(handler: str) -> None:
+@overload
+def middleware(handler: F) -> F: ...
+@overload
+def middleware(handler: str) -> None: ...
+def middleware(handler: Union[str, F]) -> Optional[F]:
     """
-    Register middleware for all routes.
+    Register middleware for all routes, or use as bare decorator.
 
-    Parameters:
-        handler: Middleware function as "library.function" string
+    Decorator form::
+
+        @http.middleware
+        def auth(request):
+            return None
+
+    Imperative form::
+
+        runtime.http.middleware("auth.check_request")
 
     The middleware receives the request object and should return:
         - None to continue to the handler
         - A response dict to short-circuit (block the request)
-
-    Example:
-        runtime.http.middleware("auth.check_request")
     """
     ...
 
@@ -296,51 +300,45 @@ class WebSocketClient:
         ...
 
 
-def not_found(handler: str) -> None:
+@overload
+def not_found(handler: F) -> F: ...
+@overload
+def not_found(handler: str) -> None: ...
+def not_found(handler: Union[str, F]) -> Optional[F]:
     """
-    Register a custom 404 Not Found handler.
+    Register a custom 404 Not Found handler, or use as bare decorator.
 
-    Parameters:
-        handler: Handler function as "library.function" string
+    Decorator form::
 
-    The handler receives the request object and should return a response.
-    It is called when no route matches the request path, or when the
-    --web-root directory is configured but the file is not found.
+        @http.not_found
+        def handle_404(request):
+            return http.html(404, "<h1>Not Found</h1>")
 
-    Example:
+    Imperative form::
+
         runtime.http.not_found("handlers.not_found")
     """
     ...
 
-def websocket(path: str, handler: str) -> None:
+@overload
+def websocket(path: str) -> Callable[[F], F]: ...
+@overload
+def websocket(path: str, handler: str) -> None: ...
+def websocket(path: str, handler: str = ...) -> Optional[Callable[[F], F]]:
     """
-    Register a WebSocket route.
+    Register a WebSocket route, or use as decorator.
 
-    The handler function receives a WebSocketClient object for each
-    connected client and typically runs a message loop.
+    Decorator form::
 
-    Parameters:
-        path: URL path for the WebSocket endpoint (e.g., "/chat")
-        handler: Handler function as "library.function" string
-
-    Handler signature:
-        def handler(client: WebSocketClient) -> None:
+        @http.websocket("/chat")
+        def chat_handler(client):
             client.send("Welcome!")
-            while client.connected():
-                msg = client.receive(timeout=60)
-                if msg:
-                    client.send(f"Echo: {msg}")
 
-    Example:
-        # Register WebSocket endpoint
+    Imperative form::
+
         runtime.http.websocket("/chat", "handlers.chat_handler")
 
-        # In handlers.py:
-        def chat_handler(client):
-            client.send("Welcome to the chat!")
-            while client.connected():
-                msg = client.receive(timeout=60)
-                if msg:
-                    client.send(f"Server: {msg}")
+    The handler receives a WebSocketClient object and runs for the
+    connection lifetime.
     """
     ...

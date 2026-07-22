@@ -32,7 +32,10 @@ Or via the parent runtime dict::
     runtime.start_server()
 """
 
-from typing import Any
+from typing import Any, Callable, overload, TypeVar, Type
+
+F = TypeVar('F', bound=Callable[..., Any])
+T = TypeVar('T')
 
 
 def serve(name: str, version: str = "", description: str = "") -> None:
@@ -64,42 +67,36 @@ def serve(name: str, version: str = "", description: str = "") -> None:
     ...
 
 
-def register_function(name: str, handler: str) -> None:
+@overload
+def register_function(name: str) -> Callable[[F], F]: ...
+@overload
+def register_function(fn: F) -> F: ...
+@overload
+def register_function(name: str, handler: str) -> None: ...
+def register_function(name: Any, handler: Any = ...) -> Any:
     """
-    Register a function for the plugin server.
+    Register a function for the plugin server, or use as decorator.
 
-    Each registered function is listed in the ``scriptling.handshake`` schema
-    and dispatched on a fresh evaluator when a client calls it via
-    ``plugin.<name>.<function>()``.
+    Three forms:
 
-    Parameters:
-        name:    Function name exposed to plugin clients.
-        handler: Handler as ``"library.function"`` string. The handler
-                 receives individual positional arguments decoded from the
-                 plugin transport (not a raw params blob). It may return any
-                 JSON-serialisable value.
+    Named decorator::
 
-    Must be called before ``runtime.start_server()``. Calling it after the
-    server has started has no effect (a warning is emitted to stderr).
+        @plugin.register_function("add")
+        def add(a, b):
+            return a + b
 
-    **Callbacks:** If a client passes a callable (function or lambda) as an
-    argument, the handler receives it as a callable object and can call it
-    normally. Callbacks are only supported over the stdio transport; HTTP
-    connections are request/response only.
+    Bare decorator (uses the function's own name)::
 
-    Example::
+        @plugin.register_function
+        def greet(name):
+            return "hello " + name
 
-        import scriptling.runtime.plugin as plugin_srv
+    Imperative::
 
-        plugin_srv.register_function("apply", "handlers.apply")
+        plugin.register_function("add", "handlers.add")
 
-    In ``handlers.py``::
-
-        def apply(fn, x):
-            return fn(x)   # fn is a callback from the client
-
-    Raising an exception from the handler produces an error response on the
-    client side.
+    The handler receives individual positional arguments decoded from the
+    plugin transport. Callbacks are supported over stdio only.
     """
     ...
 
@@ -130,29 +127,27 @@ def register_constant(name: str, value: Any) -> None:
     ...
 
 
-def register_class(handler: str) -> None:
+@overload
+def register_class(cls: Type[T]) -> Type[T]: ...
+@overload
+def register_class(handler: str) -> None: ...
+def register_class(handler: Any) -> Any:
     """
-    Register a class exported by the plugin server.
+    Register a class exported by the plugin server, or use as bare decorator.
 
-    The exposed class name is taken from the last segment of the handler
-    (e.g. ``"mymodule.Config"`` → ``"Config"``). Clients instantiate it with
-    ``plugin.myservice.Config(...)``; every instance is held server-side and
-    clients receive a remote handle.
+    Decorator form::
 
-    The server handles the full object lifecycle: ``object.new`` (constructor),
-    ``object.call_method`` (methods), and ``object.destroy`` (destructor /
-    ``__del__``).
+        @plugin.register_class
+        class Config:
+            def __init__(self, prefix):
+                self.prefix = prefix
 
-    Parameters:
-        handler: Class as ``"library.ClassName"`` string.
+    Imperative form::
 
-    Must be called before ``runtime.start_server()``. Calling it after the
-    server has started has no effect (a warning is emitted to stderr).
+        plugin.register_class("handlers.Config")
 
-    Example::
-
-        import scriptling.runtime.plugin as plugin_srv
-
-        plugin_srv.register_class("handlers.Config")
+    The exposed class name is taken from the class name (decorator) or the
+    last segment of the handler ref (imperative). The server handles the
+    full object lifecycle (new, call_method, destroy).
     """
     ...
