@@ -68,11 +68,30 @@ def read_file(name: str, path: str) -> str:
         path: File path relative to the package root.
 
     Returns:
-        File contents as a string.
+        File contents as a string. Use read_bytes() for binary files.
 
     Example:
         import scriptling.package as package
         spec = package.read_file("myapp", "data/spec.md")
+    """
+    ...
+
+
+def read_bytes(name: str, path: str) -> bytes:
+    """
+    Read a file from a package as bytes (preserves binary data).
+
+    Parameters:
+        name: Package name from manifest.toml.
+        path: File path relative to the package root.
+
+    Returns:
+        File contents as bytes.
+
+    Example:
+        import scriptling.package as package
+        import msgpack
+        data = msgpack.unpackb(package.read_bytes("myapp", "data/payload.msgpack"))
     """
     ...
 

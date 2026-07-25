@@ -59,12 +59,12 @@ class Path:
         """Write a string to the file."""
         ...
 
-    def read_bytes(self) -> str:
-        """Read the file contents as bytes."""
+    def read_bytes(self) -> bytes:
+        """Read the file contents as bytes (preserves binary data)."""
         ...
 
-    def write_bytes(self, data: str) -> None:
-        """Write bytes to the file."""
+    def write_bytes(self, data: "bytes | str") -> None:
+        """Write bytes to the file. Accepts bytes or str (UTF-8 encoded)."""
         ...
 
     def copy(self, target: str) -> "Path":

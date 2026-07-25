@@ -13,11 +13,14 @@ class Response:
     status_code: int
     """HTTP status code (e.g. 200, 404, 500)."""
 
+    content: bytes
+    """Raw response body as bytes. Use instead of .text for binary content (msgpack, images, etc.)."""
+
     text: str
-    """Response body as string."""
+    """Response body decoded as a string."""
 
     body: str
-    """Response body as string (alias for text)."""
+    """Response body as string (deprecated alias for text)."""
 
     headers: dict[str, str]
     """Response headers."""
@@ -73,13 +76,13 @@ def get(url: str, **kwargs: Any) -> Response:
     ...
 
 
-def post(url: str, data: Optional[str] = None, **kwargs: Any) -> Response:
+def post(url: str, data: "Optional[str | bytes]" = None, **kwargs: Any) -> Response:
     """
     Send a POST request.
 
     Parameters:
         url: The URL to request
-        data: Request body as string (optional)
+        data: Request body as string or bytes (optional)
         **kwargs: Optional arguments
             json (dict/list): JSON-encode as request body (sets Content-Type)
             timeout (int): Request timeout in seconds (default: 5)
@@ -93,13 +96,13 @@ def post(url: str, data: Optional[str] = None, **kwargs: Any) -> Response:
     ...
 
 
-def put(url: str, data: Optional[str] = None, **kwargs: Any) -> Response:
+def put(url: str, data: "Optional[str | bytes]" = None, **kwargs: Any) -> Response:
     """
     Send a PUT request.
 
     Parameters:
         url: The URL to request
-        data: Request body as string (optional)
+        data: Request body as string or bytes (optional)
         **kwargs: Optional arguments
             json (dict/list): JSON-encode as request body (sets Content-Type)
             timeout (int): Request timeout in seconds (default: 5)
@@ -131,13 +134,13 @@ def delete(url: str, **kwargs: Any) -> Response:
     ...
 
 
-def patch(url: str, data: Optional[str] = None, **kwargs: Any) -> Response:
+def patch(url: str, data: "Optional[str | bytes]" = None, **kwargs: Any) -> Response:
     """
     Send a PATCH request.
 
     Parameters:
         url: The URL to request
-        data: Request body as string (optional)
+        data: Request body as string or bytes (optional)
         **kwargs: Optional arguments
             json (dict/list): JSON-encode as request body (sets Content-Type)
             timeout (int): Request timeout in seconds (default: 5)

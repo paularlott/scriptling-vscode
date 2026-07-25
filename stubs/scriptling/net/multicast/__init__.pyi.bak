@@ -57,7 +57,7 @@ class MulticastGroup:
             timeout: Timeout in seconds (default: 30)
 
         Returns:
-            Dict with "data" (bytes — call .decode() for text) and "source" keys, or None on timeout
+            Dict with "data" and "source" keys, or None on timeout
 
         Example:
             msg = group.receive(timeout=5)

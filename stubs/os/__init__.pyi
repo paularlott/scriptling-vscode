@@ -28,15 +28,28 @@ def listdir(path: str = ".") -> List[str]:
     ...
 
 def read_file(path: str) -> str:
-    """Read an entire file as a string."""
+    """Read an entire file as a string. Use read_bytes() for binary files."""
     ...
 
-def write_file(path: str, content: str, mode: int = 0o644) -> None:
-    """Write a string to a file, creating or overwriting it."""
+def read_bytes(path: str) -> bytes:
+    """Read an entire file as bytes (preserves binary data)."""
     ...
 
-def append_file(path: str, content: str) -> None:
-    """Append a string to a file, creating it if needed."""
+def read_lines(path: str) -> "Iterator[str]":
+    """Iterate over lines in a file lazily (memory-efficient for large files).
+
+    Yields one str per line (without trailing newline). The file handle is
+    closed when the iterator reaches EOF; if the loop exits early, the handle
+    is closed when the iterator is garbage-collected.
+    """
+    ...
+
+def write_file(path: str, content: "str | bytes", mode: int = 0o644) -> None:
+    """Write a string or bytes to a file, creating or overwriting it."""
+    ...
+
+def append_file(path: str, content: "str | bytes") -> None:
+    """Append a string or bytes to a file, creating it if needed."""
     ...
 
 def remove(path: str) -> None:
