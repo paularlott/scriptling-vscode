@@ -42,11 +42,3 @@ def pack(obj: Any) -> bytes:
 def unpack(packed: bytes) -> Any:
     """Alias for unpackb()."""
     ...
-
-
-def codec_name() -> str:
-    """
-    Return the name of the backing MessagePack codec (e.g. "shamaton-msgpack").
-    Useful for logging or branching when interoperating with gossip.
-    """
-    ...
