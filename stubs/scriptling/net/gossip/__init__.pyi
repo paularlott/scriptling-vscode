@@ -486,7 +486,7 @@ class Cluster:
         check_interval: str = "1s",
         leader_timeout: str = "3s",
         heartbeat_msg_type: int = 65,
-        quorum_percentage: int = 60,
+        min_cluster_size: int = 0,
         metadata_criteria: Optional[dict[str, str]] = None
     ) -> LeaderElection:
         """
@@ -496,7 +496,7 @@ class Cluster:
             check_interval: Duration between leader checks (default: "1s")
             leader_timeout: Duration without heartbeat before leader lost (default: "3s")
             heartbeat_msg_type: Message type for heartbeats (default: 65)
-            quorum_percentage: Percentage of nodes for quorum 1-100 (default: 60)
+            min_cluster_size: Minimum nodes required for quorum, a hard floor; set to the majority of the smallest cluster (default: 0)
             metadata_criteria: Optional metadata to limit eligible nodes
 
         Returns:
