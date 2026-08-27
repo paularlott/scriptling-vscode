@@ -14,11 +14,13 @@ class Request:
     HTTP request object passed to route handlers.
 
     Attributes:
-        method: HTTP method (GET, POST, PUT, DELETE)
+        method: HTTP method (GET, POST, PUT, PATCH, DELETE)
         path: Request path
         body: Request body as string
         headers: Request headers (lowercase keys)
         query: Query parameters
+        path_params: Path parameters captured from route wildcards
+        remote_addr: Remote address of the client
     """
 
     method: str
@@ -26,6 +28,50 @@ class Request:
     body: str
     headers: dict[str, str]
     query: dict[str, str]
+    path_params: dict[str, str]
+    remote_addr: str
+
+    def path_param(self, name: str, default: Optional[Any] = None) -> Any:
+        """
+        Get a path parameter captured from a route wildcard.
+
+        Route patterns like "/api/users/{id}" capture the matching request
+        path segments, percent-decoded.
+
+        Parameters:
+            name: Path parameter name
+            default: Value returned when the parameter is absent
+
+        Returns:
+            The captured value, default, or None
+        """
+        ...
+
+    def query_param(self, name: str, default: Optional[Any] = None) -> Any:
+        """
+        Get a query parameter.
+
+        Parameters:
+            name: Query parameter name
+            default: Value returned when the parameter is absent
+
+        Returns:
+            The first value of the parameter, default, or None
+        """
+        ...
+
+    def header(self, name: str, default: Optional[Any] = None) -> Any:
+        """
+        Get a request header. Header names are case-insensitive.
+
+        Parameters:
+            name: Header name
+            default: Value returned when the header is absent
+
+        Returns:
+            The header value, default, or None
+        """
+        ...
 
     def json(self) -> Any:
         """
@@ -70,6 +116,14 @@ def put(path: str) -> Callable[[F], F]: ...
 def put(path: str, handler: str) -> None: ...
 def put(path: str, handler: str = ...) -> Optional[Callable[[F], F]]:
     """Register a PUT route, or use as decorator."""
+    ...
+
+@overload
+def patch(path: str) -> Callable[[F], F]: ...
+@overload
+def patch(path: str, handler: str) -> None: ...
+def patch(path: str, handler: str = ...) -> Optional[Callable[[F], F]]:
+    """Register a PATCH route, or use as decorator."""
     ...
 
 @overload
