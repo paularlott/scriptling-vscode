@@ -21,6 +21,8 @@ class Request:
         query: Query parameters
         path_params: Path parameters captured from route wildcards
         remote_addr: Remote address of the client
+        context: Dict the middleware can populate to pass data to the
+            handler (per-request, unrelated to the KV store)
     """
 
     method: str
@@ -30,6 +32,7 @@ class Request:
     query: dict[str, str]
     path_params: dict[str, str]
     remote_addr: str
+    context: dict[str, Any]
 
     def path_param(self, name: str, default: Optional[Any] = None) -> Any:
         """

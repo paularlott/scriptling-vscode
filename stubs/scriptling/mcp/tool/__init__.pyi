@@ -7,6 +7,8 @@ MCP (Model Context Protocol) tool handlers.
 
 from typing import Optional, Any
 
+from scriptling.runtime.http import Request
+
 # Parameter getters
 def get_int(name: str, default: int = 0) -> int:
     """
@@ -164,6 +166,41 @@ def get_bool_list(name: str, default: Optional[list[bool]] = None) -> list[bool]
         options = mcp.tool.get_bool_list("options", [false])
     """
     ...
+
+# Request access
+def get_request() -> Optional[Request]:
+    """
+    Get the HTTP request this tool call is being served for.
+
+    Returns the same Request object the middleware saw (method, path, headers,
+    query, path_params, remote_addr and the context dict the middleware may
+    have populated), or None when there is no HTTP request — the stdio
+    transports and anywhere else outside a served request.
+
+    Example:
+        req = mcp.tool.get_request()
+        if req:
+            log(req.remote_addr + " called this tool")
+    """
+    ...
+
+
+def request_context() -> dict[str, Any]:
+    """
+    Get the context dict set by the middleware.
+
+    Middleware can write to request.context (e.g. request.context["user"] = name
+    after authenticating); this returns a copy of that dict. It is always a
+    dict — empty when no middleware ran or set anything — so
+    request_context().get("user", "default") is always safe. Each call gets its
+    own copy, so writes from the handler are local and never visible to other
+    handlers.
+
+    Example:
+        user = mcp.tool.request_context().get("user", "anonymous")
+    """
+    ...
+
 
 # Result functions
 def return_string(text: str) -> None:

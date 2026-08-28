@@ -10,6 +10,8 @@ with ``scriptling --server :8000 --json-rpc setup.py``.
 
 from typing import Any, Optional, Callable, overload, TypeVar
 
+from scriptling.runtime.http import Request
+
 F = TypeVar('F', bound=Callable[..., Any])
 
 
@@ -98,5 +100,43 @@ def error(code: int, message: str, data: Any = None) -> JSONRPCError:
             if params["b"] == 0:
                 return runtime.jsonrpc.error(-32602, "division by zero", {"field": "b"})
             return params["a"] / params["b"]
+    """
+    ...
+
+
+def get_request() -> Optional[Request]:
+    """
+    Get the HTTP request this call is being served for.
+
+    Returns the same Request object the middleware saw (method, path, headers,
+    query, path_params, remote_addr and the context dict the middleware may
+    have populated), or None over the stdio transport where there is no HTTP
+    request.
+
+    Example:
+        def who(params):
+            req = runtime.jsonrpc.get_request()
+            if req:
+                return {"ip": req.remote_addr}
+            return {"ip": "stdio"}
+    """
+    ...
+
+
+def request_context() -> dict[str, Any]:
+    """
+    Get the context dict set by the middleware.
+
+    Middleware can write to request.context (e.g. request.context["user"] = name
+    after authenticating); this returns a copy of that dict. It is always a
+    dict — empty when no middleware ran or set anything — so
+    request_context().get("user", "default") is always safe. Each call gets its
+    own copy, so writes from the handler are local — with a batch dispatching
+    concurrently, one element's writes are never visible to the others.
+
+    Example:
+        def who(params):
+            user = runtime.jsonrpc.request_context().get("user", "anonymous")
+            return {"user": user}
     """
     ...
