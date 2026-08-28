@@ -3,9 +3,10 @@ Scriptling plugin control library stubs.
 
 Two flavours of plugin live side by side:
 
-* Discovered plugins -- loaded eagerly from --plugin-dir directories and
-  exposed as importable ``plugin.<name>`` libraries with auto-generated
-  proxies for functions, classes, and constants.
+* Discovered plugins -- loaded eagerly from --plugin-dir directories or a
+  --plugin executable (with arguments supplied by --plugin-arg), and exposed as
+  importable ``plugin.<name>`` libraries with auto-generated proxies for
+  functions, classes, and constants.
 * Runtime-loaded JSON-RPC peers -- spawned on demand as executables or connected
   over HTTP(S) with ``load()`` and driven through ``call_function``. Peers
   loaded with ``scriptling=True`` also register importable ``plugin.*`` proxy
@@ -28,7 +29,10 @@ class BatchCall(TypedDict, total=False):
 
 
 def list() -> list[dict[str, Any]]:
-    """Return metadata for all loaded executables (discovered + runtime-loaded)."""
+    """Return metadata for all loaded executables (discovered + runtime-loaded).
+
+    Each metadata dict carries the keys documented on :func:`describe`.
+    """
     ...
 
 
@@ -37,6 +41,19 @@ def describe(name: str) -> dict[str, Any]:
 
     Accepts the short name (e.g. ``"widgets"``) or the normalised name
     (``"plugin.widgets"``).
+
+    The returned dict has the keys:
+
+    * ``name`` -- normalised library name (``"plugin.widgets"``).
+    * ``version``, ``description`` -- as declared by the plugin.
+    * ``transport`` -- ``"json"``.
+    * ``capabilities`` -- list of plugin capabilities. A fetcher plugin
+      advertises ``"fetch"``.
+    * ``scheme`` -- the source scheme this plugin's fetcher serves, e.g.
+      ``"knot"`` (present on fetcher plugins; one scheme per plugin, and its
+      library attaches automatically when the plugin loads).
+    * ``functions``, ``classes``, ``constants`` -- names from the plugin's
+      schema.
     """
     ...
 
