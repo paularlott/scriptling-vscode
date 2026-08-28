@@ -47,8 +47,8 @@ def describe(name: str) -> dict[str, Any]:
     * ``name`` -- normalised library name (``"plugin.widgets"``).
     * ``version``, ``description`` -- as declared by the plugin.
     * ``transport`` -- ``"json"``.
-    * ``capabilities`` -- list of plugin capabilities. A fetcher plugin
-      advertises ``"fetch"``.
+    * ``capabilities`` -- list of plugin capabilities (currently only
+      ``"remote_objects"``).
     * ``scheme`` -- the source scheme this plugin's fetcher serves, e.g.
       ``"knot"`` (present on fetcher plugins; one scheme per plugin, and its
       library attaches automatically when the plugin loads).
