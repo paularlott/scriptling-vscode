@@ -47,8 +47,8 @@ class Connection:
     def get_orm(self) -> ORM:
         """Return the ORM bound to this connection.
 
-        kwargs forms (insert/update/delete/count/tables), the query
-        builder (select -> .where(...)....fetch()), criteria constructors
+        query builders (select/update/delete -> .where(...)....
+        fetch()/execute()), the quick insert form, criteria constructors
         (eq/any_of/...) and model gateways (table(factory, ...)).
         """
         ...
@@ -59,9 +59,9 @@ class Connection:
 
 
 class ORM:
-    """Table helper from Connection.get_orm(): kwargs forms, query builder, models."""
+    """Table helper from Connection.get_orm(): query builders, quick forms, models."""
 
-    # kwargs forms
+    # quick forms
 
     def insert(self, table: str, values: Dict[str, Any], pk: str = "id") -> ExecResult:
         """Insert one row from a dict of column to value.
@@ -69,18 +69,6 @@ class ORM:
         last_insert_id works on every backend (RETURNING on postgres,
         through the primary key named by pk).
         """
-        ...
-
-    def update(self, table: str, values: Dict[str, Any], where: str, *params: Any) -> ExecResult:
-        """Set columns on matching rows. A where clause is required."""
-        ...
-
-    def delete(self, table: str, where: str, *params: Any) -> ExecResult:
-        """Delete matching rows. A where clause is required."""
-        ...
-
-    def count(self, table: str, where: str = "", *params: Any) -> int:
-        """Row count, optionally restricted by a where clause."""
         ...
 
     def tables(self) -> List[str]:
@@ -95,10 +83,18 @@ class ORM:
         """DROP TABLE IF EXISTS."""
         ...
 
-    # query builder
+    # query builders
 
     def select(self, table: str, *columns: str) -> "QueryBuilder":
         """Start a chained query; .fetch() runs it. Columns optional (all)."""
+        ...
+
+    def update(self, table: str, values: Dict[str, Any]) -> "UpdateQuery":
+        """Start a chained update; .where(...) then .execute(). Where required."""
+        ...
+
+    def delete(self, table: str) -> "DeleteQuery":
+        """Start a chained delete; .where(...) then .execute(). Where required."""
         ...
 
     # criteria
@@ -122,7 +118,12 @@ class ORM:
 
     def table(self, factory: Any, table: str, pk: str = "id",
               columns: Optional[List[str]] = ...) -> "ModelGateway":
-        """Bind a row factory to a table. columns is required for insert/save."""
+        """Bind a row factory to a table.
+
+        Without columns the gateway writes every column the table has
+        (read from the schema once per get_orm() and cached); pass a list
+        to manage a subset.
+        """
         ...
 
 
@@ -185,6 +186,46 @@ class QueryBuilder:
     def iterate(self) -> "RowIterator": ...
     def one(self) -> Optional[Dict[str, Any]]: ...
     def count(self) -> int: ...
+
+
+class UpdateQuery:
+    """A chained update from orm.update(table, values); every method returns the query."""
+
+    def where(self, column: str, op: str, value: Any) -> "UpdateQuery":
+        """Add an AND condition; op in = != <> < <= > >= like."""
+        ...
+
+    def where(self, criterion: Criterion) -> "UpdateQuery":
+        """Add an AND condition from orm.eq()/any_of()/... ."""
+        ...
+
+    def where_sql(self, fragment: str, *params: Any) -> "UpdateQuery":
+        """Escape hatch: raw SQL fragment with ? placeholders."""
+        ...
+
+    def execute(self) -> ExecResult:
+        """Run the update. Refuses to run without a where clause."""
+        ...
+
+
+class DeleteQuery:
+    """A chained delete from orm.delete(table); every method returns the query."""
+
+    def where(self, column: str, op: str, value: Any) -> "DeleteQuery":
+        """Add an AND condition; op in = != <> < <= > >= like."""
+        ...
+
+    def where(self, criterion: Criterion) -> "DeleteQuery":
+        """Add an AND condition from orm.eq()/any_of()/... ."""
+        ...
+
+    def where_sql(self, fragment: str, *params: Any) -> "DeleteQuery":
+        """Escape hatch: raw SQL fragment with ? placeholders."""
+        ...
+
+    def execute(self) -> ExecResult:
+        """Run the delete. Refuses to run without a where clause."""
+        ...
 
 
 class ModelGateway:
