@@ -235,9 +235,22 @@ class ModelGateway:
         """Factory(row) for the primary key, or None."""
         ...
 
-    def insert(self, obj: Any) -> ExecResult: ...
-    def save(self, obj: Any) -> ExecResult:
-        """Update by primary key."""
+    def insert(self, obj: Any, columns: Optional[List[str]] = None) -> ExecResult:
+        """Insert one row from the object.
+
+        Without columns, None values are skipped so schema defaults apply and
+        the primary key auto-assigns. With columns, the list is explicit:
+        exactly those columns are written and a listed None inserts as NULL.
+        """
+        ...
+
+    def save(self, obj: Any, columns: Optional[List[str]] = None) -> ExecResult:
+        """Update by primary key.
+
+        Without columns, every managed non-pk column is written (None clears
+        the field). With columns, exactly the listed columns are written for
+        this call.
+        """
         ...
 
     def delete(self, target: Any) -> ExecResult:
