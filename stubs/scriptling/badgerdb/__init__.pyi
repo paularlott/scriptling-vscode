@@ -63,7 +63,13 @@ class Client:
         ...
 
     def hash_set(self, key: str, field: str, value: str) -> int:
-        """Set one hash field; 1 when the field was new, 0 when it overwrote."""
+        """Set one hash field; 1 when the field was new, 0 when it overwrote.
+
+        Hashes and plain values keep separate identities: a hash command on
+        a plain-valued key fails with WRONGTYPE, reads and counters refuse a
+        hash key, while set/mset replace any value and set_if_absent reports
+        False against one.
+        """
         ...
 
     def hash_get(self, key: str, field: str) -> Optional[str]:

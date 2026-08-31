@@ -267,7 +267,10 @@ def connect(dsn: str) -> Connection:
     Parameters:
         dsn: e.g. ``"postgres://user:pass@host:5432/db"``,
             ``"mysql://user:pass@host:3306/db"``,
-            ``"mariadb://user:pass@host:3306/db"``. The server address must
-            pass the host's network policy.
+            ``"mariadb://user:pass@host:3306/db"`` (scheme casing ignored).
+            The server address must pass the host's network policy. MySQL
+            query parameters are session variables, except ``tls=true``,
+            ``tls=false`` or ``tls=skip-verify`` which enable the driver's
+            TLS modes.
     """
     ...
