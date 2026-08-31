@@ -1,9 +1,10 @@
 """
 Scriptling Package Library - Type stubs for IntelliSense support.
 
-Read-only access to files inside loaded packages (app bundles and library
-bundles). Available when running via --package. Every function takes the
-package name (from manifest.toml) as its first argument.
+Read-only access to files inside loaded packages (app bundles, library
+bundles, and fetcher plugin libraries, which are named after their plugin).
+Available when running via --package or with a fetcher plugin loaded. Every
+function takes the package name (from manifest.toml) as its first argument.
 """
 
 from typing import Optional
@@ -116,7 +117,8 @@ def glob(name: str, pattern: str) -> list[str]:
 
     Parameters:
         name: Package name from manifest.toml.
-        pattern: Glob pattern (* and ? wildcards, ** for recursive).
+        pattern: Glob pattern; * and ? stay within a segment, ** crosses
+            segments (so "**/*.md" also matches a file at the package root).
 
     Returns:
         list of str: Matching file paths relative to the package root.
