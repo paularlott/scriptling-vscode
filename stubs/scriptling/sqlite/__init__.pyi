@@ -44,6 +44,17 @@ class Connection:
         """
         ...
 
+    def begin(self) -> Transaction:
+        """Start a transaction.
+
+        Statements run through the returned Transaction — its query(),
+        query_iter() and execute() — are one atomic unit until commit()
+        keeps them or rollback() discards them. On a private in-memory
+        database (":memory:") the connection's own calls fail fast while
+        the transaction is open; use the transaction's methods until it
+        ends.
+        """
+        ...
 
     def get_orm(self) -> ORM:
         """Return the ORM bound to this connection.
@@ -56,6 +67,48 @@ class Connection:
 
     def close(self) -> None:
         """Close the connection and release the database handle."""
+        ...
+
+
+class Transaction:
+    """An open transaction from Connection.begin().
+
+    query(), query_iter() and execute() run inside it; commit() makes the
+    changes permanent and rollback() discards them. Every operation on a
+    finished transaction raises ("transaction is already committed or
+    rolled back"), and one abandoned without either call rolls back when
+    it is collected.
+    """
+
+    def query(self, sql: str, *params: Any) -> List[_Row]:
+        """Execute a SELECT-style statement inside the transaction."""
+        ...
+
+    def query_iter(self, sql: str, *params: Any) -> Cursor:
+        """Stream the statement's rows via a Cursor.
+
+        Drain or close the cursor before commit() or rollback().
+        """
+        ...
+
+    def execute(self, sql: str, *params: Any) -> ExecResult:
+        """Execute a row-changing statement inside the transaction."""
+        ...
+
+    def commit(self) -> None:
+        """Make the transaction's changes permanent and end it."""
+        ...
+
+    def rollback(self) -> None:
+        """Discard the transaction's changes and end it."""
+        ...
+
+    def get_orm(self) -> ORM:
+        """Return the ORM bound to this transaction.
+
+        Every call through it — query builders, model gateways — joins
+        the transaction.
+        """
         ...
 
 
