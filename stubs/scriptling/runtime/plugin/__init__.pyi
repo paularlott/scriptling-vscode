@@ -38,7 +38,13 @@ F = TypeVar('F', bound=Callable[..., Any])
 T = TypeVar('T')
 
 
-def serve(name: str, version: str = "", description: str = "") -> None:
+def serve(
+    name: str,
+    version: str = "",
+    description: str = "",
+    *,
+    metadata: dict[str, Any] | None = None,
+) -> None:
     """
     Declare this script as a Scriptling plugin server.
 
@@ -56,13 +62,22 @@ def serve(name: str, version: str = "", description: str = "") -> None:
                      ``plugin.myservice``.
         version:     Optional version string (e.g. ``"1.0.0"``).
         description: Optional human-readable description surfaced in plugin
-                     metadata (``scriptling.plugin.info()``).
+                     metadata (``scriptling.plugin.describe()``).
+        metadata:    Optional opaque, host-defined manifest data carried
+                     verbatim in the plugin handshake. Scriptling never
+                     interprets it; a host reads it back via
+                     ``scriptling.plugin.describe(name)["custom"]`` to learn
+                     plugin-specific declarations without running plugin code.
+                     Keep it static (constant across runs).
 
     Example::
 
         import scriptling.runtime.plugin as plugin_srv
 
-        plugin_srv.serve("calculator", "1.0", "Basic arithmetic operations")
+        plugin_srv.serve(
+            "calculator", "1.0", "Basic arithmetic operations",
+            metadata={"kind": "math"},
+        )
     """
     ...
 

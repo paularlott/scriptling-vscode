@@ -54,6 +54,9 @@ def describe(name: str) -> dict[str, Any]:
       library attaches automatically when the plugin loads).
     * ``functions``, ``classes``, ``constants`` -- names from the plugin's
       schema.
+    * ``custom`` -- opaque host-defined manifest data the plugin declared
+      (``Server.SetMetadata`` in Go, ``runtime.plugin.serve(metadata=...)`` in
+      Scriptling), carried verbatim; ``None`` when the plugin declared none.
     """
     ...
 
