@@ -145,6 +145,45 @@ def register_constant(name: str, value: Any) -> None:
 @overload
 def register_class(cls: Type[T]) -> Type[T]: ...
 @overload
+def register_fetcher(
+    scheme: str,
+    read_handler: str,
+    glob_handler: str | None = None,
+) -> None:
+    """
+    Serve sources from this plugin server.
+
+    Registers a fetcher so the host can ask this peer for files on demand —
+    how a script peer serves a host's declared assets (an icon, a logo) from
+    strings or bytes inside the script itself, the scriptling equivalent of
+    a Go peer's embedded assets. The host calls the handlers with the full
+    source string and a slash path relative to it.
+
+    Parameters:
+        scheme:        The source scheme to serve, e.g. ``"notes"`` (the host
+                       asks for ``notes://<path>``). Must not be http, https
+                       or file.
+        read_handler:  A ``"library.function"`` ref called as
+                       ``fn(source, path)``. Return the file's contents
+                       (string or bytes); return ``None`` for a miss (not
+                       found); any other error fails the read.
+        glob_handler:  Optional ``"library.function"`` ref called as
+                       ``fn(source, pattern)``; return a list of
+                       ``{name, is_dir}`` dicts. Without it the fetcher
+                       reports no glob matches.
+
+    Must be called before ``runtime.start_server()``. Calling it after the
+    server has started has no effect (a warning is emitted to stderr).
+
+    Example::
+
+        import scriptling.runtime.plugin as plugin_srv
+
+        plugin_srv.register_fetcher("notes", "impl.fetch_read")
+    """
+    ...
+
+
 def register_class(handler: str) -> None: ...
 def register_class(handler: Any) -> Any:
     """
