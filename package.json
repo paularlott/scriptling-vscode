@@ -2,7 +2,7 @@
   "name": "scriptling",
   "displayName": "Scriptling Language Support",
   "description": "IntelliSense and language support for Scriptling extension libraries (ai, mcp, provision, similarity, agent)",
-  "version": "0.8.3",
+  "version": "0.8.4",
   "publisher": "paularlott",
   "license": "MIT",
   "pricing": "Free",
@@ -31,7 +31,9 @@
     "go"
   ],
   "activationEvents": [
-    "onLanguage:python"
+    "onLanguage:python",
+    "onLanguage:toml",
+    "workspaceContains:**/*.toml"
   ],
   "main": "./out/extension.js",
   "contributes": {

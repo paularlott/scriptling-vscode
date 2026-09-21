@@ -1,5 +1,6 @@
 import * as vscode from 'vscode';
 import * as path from 'path';
+import { registerToolMetadataCompletions } from './tomlCompletions';
 
 let stubPathDisposable: vscode.Disposable | undefined;
 
@@ -15,6 +16,9 @@ export function activate(context: vscode.ExtensionContext) {
             }
         })
     );
+
+    // IntelliSense for legacy MCP tool metadata (tools/*.toml)
+    registerToolMetadataCompletions(context);
 
     console.log('Scriptling extension activated');
 }

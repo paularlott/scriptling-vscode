@@ -235,6 +235,29 @@ def return_object(obj: Any) -> None:
     """
     ...
 
+def return_structured(obj: dict[str, Any]) -> None:
+    """
+    Return obj as the tool's structuredContent and stop execution.
+
+    Sets obj (a dict) as the MCP result's structuredContent field, per the
+    MCP spec's structured-content convention (used by e.g. an outputSchema
+    and by the MCP Apps extension). For backwards compatibility with clients
+    that don't read structuredContent, the same JSON is also included as a
+    text content block — you don't need to call return_object() as well.
+
+    obj must be a dict (a JSON object); use return_object() for a list,
+    string, or other non-object JSON value.
+    Stops script execution immediately - no code after this call will execute.
+
+    Parameters:
+        obj: The dict to set as structuredContent
+
+    Example:
+        mcp.tool.return_structured({"records": [{"date": "2026-01-01", "amount": 42}]})
+        # Code here will not execute
+    """
+    ...
+
 def return_toon(obj: Any) -> None:
     """
     Return an object encoded as TOON from the tool and stop execution.

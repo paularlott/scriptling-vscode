@@ -14,11 +14,14 @@ from typing import Any, Callable, Optional
 
 def register_request_tool(
     name: str,
+    *,
     handler: str,
     description: str = "",
     params: Optional[dict[str, Any]] = None,
     keywords: Optional[list[str]] = None,
     discoverable: bool = False,
+    ui: Optional[dict[str, Any]] = None,
+    icons: Optional[list[dict[str, Any]]] = None,
 ) -> None:
     """
     Register an MCP tool for this request.
@@ -38,6 +41,18 @@ def register_request_tool(
             (description) or a dict with "type", "description" and "required"
         keywords: Keywords for tool search/discovery
         discoverable: Hide from tools/list, expose via search only
+        ui: Links this tool to a companion UI resource per the MCP Apps
+            extension (https://github.com/modelcontextprotocol/ext-apps). A
+            dict with an optional "resourceUri" (str, the ui:// resource —
+            omit it for an "app"-only action tool with no view of its own,
+            such as a form submission only ever called by a view that's
+            already open) and optional "visibility" (list of "model" and/or
+            "app"; defaults to both). At least one of "resourceUri" or
+            "visibility" is required if "ui" is given at all
+        icons: Visual identifiers for this tool's tools/list descriptor. Each
+            element is a dict with a required "src" (str, an https:// URL or
+            data: URI) and optional "mimeType", "sizes" (list of strings like
+            "48x48"), and "theme" ("light" or "dark")
 
     Only meaningful while serving MCP over HTTP (in middleware); raises an
     error otherwise. Inside the handler, mcp.tool.get_string() reads arguments
@@ -60,8 +75,9 @@ def register_request_tool(
 
 def register_request_resource(
     uri: str,
+    *,
     handler: str,
-    name: str,
+    name: str = "",
     description: str = "",
     mime_type: str = "",
     template: bool = False,
@@ -83,7 +99,9 @@ def register_request_resource(
         name: Human-readable resource name
         description: Resource description
         mime_type: Content type (default "text/plain", or
-            "application/json" for dict/list results)
+            "application/json" for dict/list results). Ignored for a
+            "ui://" uri — the MCP Apps extension MUSTs that exact
+            mimeType, so it's always set for you
         template: Treat uri as a {var} URI template
 
     Only meaningful while serving MCP over HTTP (in middleware); raises an
@@ -94,6 +112,7 @@ def register_request_resource(
 
 def register_request_prompt(
     name: str,
+    *,
     handler: str,
     description: str = "",
     arguments: Optional[list[dict[str, Any]]] = None,
@@ -150,6 +169,8 @@ def tool(
     params: Optional[dict[str, Any]] = None,
     keywords: Optional[list[str]] = None,
     discoverable: bool = False,
+    ui: Optional[dict[str, Any]] = None,
+    icons: Optional[list[dict[str, Any]]] = None,
 ) -> Callable[[Callable[..., Any]], Callable[..., Any]]:
     """
     Decorator for MCP tools.
@@ -167,6 +188,18 @@ def tool(
         keywords: Keywords for tool search/discovery
         discoverable: If True, tool is hidden from tools/list and only
             available via search
+        ui: Links this tool to a companion UI resource per the MCP Apps
+            extension (https://github.com/modelcontextprotocol/ext-apps). A
+            dict with an optional "resourceUri" (str, the ui:// resource —
+            omit it for an "app"-only action tool with no view of its own,
+            such as a form submission only ever called by a view that's
+            already open) and optional "visibility" (list of "model" and/or
+            "app"; defaults to both). At least one of "resourceUri" or
+            "visibility" is required if "ui" is given at all
+        icons: Visual identifiers for this tool's tools/list descriptor. Each
+            element is a dict with a required "src" (str, an https:// URL or
+            data: URI) and optional "mimeType", "sizes" (list of strings like
+            "48x48"), and "theme" ("light" or "dark")
 
     Example:
         @mcp.tool(
@@ -175,5 +208,16 @@ def tool(
         )
         def calc(expr):
             return f"{expr} = {eval(expr)}"
+
+        @mcp.tool(description="Get the sales report",
+                  ui={"resourceUri": "ui://sales-dashboard/dashboard.html"},
+                  icons=[{"src": "https://example.com/sales.png", "mimeType": "image/png"}])
+        def sales_report():
+            return {"records": [...]}
+
+        @mcp.tool(description="Add a sale record (called by the dashboard's own form, not the model)",
+                  ui={"visibility": ["app"]})
+        def add_sale(date, product, amount):
+            return {"records": [...]}
     """
     ...
