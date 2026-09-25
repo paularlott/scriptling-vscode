@@ -15,7 +15,9 @@ class MCPClient:
         List available tools.
 
         Returns:
-            List of tool dicts with name, description, input_schema
+            List of tool dicts with name, description, inputSchema, is_app.
+            is_app is True when the tool is an MCP Apps view (linked to a
+            ui:// resource): a host UI renders its view when it is called.
 
         Example:
             tools = client.tools()
@@ -38,6 +40,38 @@ class MCPClient:
         Example:
             result = client.call_tool("search", {"query": "golang"})
             print(result)
+        """
+        ...
+
+    def skills(self) -> list[dict[str, Any]]:
+        """
+        List available skills (Skills extension, io.modelcontextprotocol/skills).
+
+        Returns:
+            List of skill entry dicts with uri (of SKILL.md), frontmatter
+            (served verbatim from the SKILL.md: name, description, plus any
+            other author fields) and resources (per-file uri, digest, size).
+
+        Example:
+            for skill in client.skills():
+                print(skill["frontmatter"]["name"])
+        """
+        ...
+
+    def get_skill(self, uri: str) -> dict[str, Any]:
+        """
+        Fetch one skill's entry (frontmatter and per-file digests) by URI.
+
+        Parameters:
+            uri: Skill URI from skills() — the SKILL.md URI or the root.
+
+        Returns:
+            The skill entry dict. Read file content with read_resource on
+            any of the entry's resource URIs.
+
+        Example:
+            entry = client.get_skill("skill://code-review/SKILL.md")
+            content = client.read_resource("skill://code-review/SKILL.md")
         """
         ...
 
