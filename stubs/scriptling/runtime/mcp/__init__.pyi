@@ -1,10 +1,10 @@
 """
 Scriptling Runtime MCP Library - Type stubs for IntelliSense support.
 
-Server-side MCP registration: the @mcp.tool decorator for statically
-registered tools, and the register_request_* functions middleware uses to
-expose tools, resources and prompts for the life of a single request
-(per-user tool sets).
+Server-side MCP registration: the @mcp.tool, @mcp.resource, @mcp.prompt and
+@mcp.skill decorators for statically registered entries, and the
+register_request_* functions middleware uses to expose tools, resources and
+prompts for the life of a single request (per-user tool sets).
 """
 
 from typing import Any, Callable, Optional
@@ -219,5 +219,98 @@ def tool(
                   ui={"visibility": ["app"]})
         def add_sale(date, product, amount):
             return {"records": [...]}
+    """
+    ...
+
+
+def resource(
+    uri: str,
+    *,
+    name: str = "",
+    description: str = "",
+    mime_type: str = "",
+    template: bool = False,
+) -> Callable[[Callable[..., Any]], Callable[..., Any]]:
+    """
+    Decorator for MCP resources.
+
+    Decorates a function to register it as an MCP resource (or, with
+    template=True, a URI template like "user://docs/{path}"). For a static
+    resource the function takes no parameters; for a template its parameters
+    are the URI's {var} variables. A string return is the content; a
+    dict/list return is JSON encoded. The function runs on every
+    resources/read, so content can change between reads.
+
+    Parameters:
+        uri: Resource URI, or the URI template when template=True
+        name: Human-readable resource name (defaults to the URI)
+        description: Resource description
+        mime_type: Content type (default "text/plain", or "application/json"
+            for dict/list results). Ignored for a "ui://" uri — the MCP Apps
+            extension MUSTs that exact mimeType, so it's always set for you
+        template: Treat uri as a {var} URI template
+
+    Example:
+        @mcp.resource("config://app", name="App config", mime_type="application/json")
+        def app_config():
+            return {"version": "1.0"}
+
+        @mcp.resource("user://docs/{path}", template=True, mime_type="text/markdown")
+        def user_doc(path):
+            return "# doc " + path
+    """
+    ...
+
+
+def prompt(
+    description: str = "",
+    *,
+    arguments: Optional[list[dict[str, Any]]] = None,
+) -> Callable[[Callable[..., Any]], Callable[..., Any]]:
+    """
+    Decorator for MCP prompts.
+
+    Decorates a function to register it as an MCP prompt under the function's
+    own name. The function's parameters become the prompt's arguments and are
+    passed on every prompts/get. A string return is a single user message; a
+    dict with a "messages" list of {"role": "user"|"assistant",
+    "content": "..."} builds a multi-message prompt.
+
+    Parameters:
+        description: Prompt description
+        arguments: Argument metadata dicts with "name", "description" and
+            "required". Inferred from the function signature when omitted (a
+            parameter without a default is required).
+
+    Example:
+        @mcp.prompt(description="Summarise a document")
+        def summarise(text, style="brief"):
+            return "Summarise (style=" + style + "): " + text
+    """
+    ...
+
+
+def skill(
+    *,
+    files: Optional[dict[str, str]] = None,
+) -> Callable[[Callable[..., Any]], Callable[..., Any]]:
+    """
+    Decorator for MCP skills.
+
+    Decorates a function to register it as an MCP skill (the Agent Skills
+    format) under the function's own name. The function takes no parameters
+    and returns the SKILL.md content, including its YAML frontmatter; the
+    frontmatter's name must match the function name and its description seeds
+    the skill's listing. The function runs once when the server starts
+    (skills are static content; they do not reload).
+
+    Parameters:
+        files: Supporting files mapping file name to content string, served
+            alongside SKILL.md as skill://<name>/<file>
+
+    Example:
+        @mcp.skill(files={"regions.md": "eu-west: Europe\\n"})
+        def region_guide():
+            return "---\\nname: region_guide\\ndescription: d\\n---\\n\\nbody"
     """
     ...

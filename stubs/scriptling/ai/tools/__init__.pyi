@@ -47,6 +47,39 @@ class Registry:
         """
         ...
 
+    def add_schema(
+        self,
+        name: str,
+        description: str,
+        schema: dict[str, Any],
+        handler: Callable[[dict[str, Any]], Any]
+    ) -> None:
+        """
+        Add a tool with a full JSON Schema.
+
+        Like add(), but the parameters are given as a complete JSON Schema
+        dict, emitted verbatim in the built tool definition. Use this when the
+        parameter shape is richer than flat name -> type mappings can express
+        (nested objects, enums, per-parameter descriptions), e.g. a schema
+        that arrived from a remote MCP server. Unlike add(), a duplicate name
+        is an error rather than silently overwriting the previous handler.
+
+        Parameters:
+            name: Tool name (e.g., "shop__search")
+            description: Tool description for the AI
+            schema: JSON Schema for the tool's parameters ("type": "object"
+                    with "properties")
+            handler: Function to execute when tool is called, receives arguments dict
+
+        Example:
+            registry.add_schema("shop__search", "Search products", {
+                "type": "object",
+                "properties": {"query": {"type": "string"}},
+                "required": ["query"],
+            }, search_func)
+        """
+        ...
+
     def build(self) -> list[dict[str, Any]]:
         """
         Build OpenAI-compatible tool schemas.

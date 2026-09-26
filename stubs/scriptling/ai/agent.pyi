@@ -13,6 +13,7 @@ from scriptling.ai import OpenAIClient, ToolRegistry
 
 if TYPE_CHECKING:
     from scriptling.ai.memory import MemoryStore
+    from scriptling.mcp import MCPClient
 
 class Message:
     """Represents a message in the conversation."""
@@ -32,6 +33,13 @@ class Agent:
     - Adds memory tools (memory_remember, memory_recall, memory_forget)
     - Appends memory instructions to the system prompt
     - Pre-loads preferences into the system prompt
+
+    When MCP servers are provided, the agent automatically:
+    - Registers every server tool under its namespaced name (e.g. a
+      "search" tool on a client with namespace="shop" becomes "shop__search"),
+      keeping the server's own input schema
+    - Lists the servers' skills in the system prompt with namespace-qualified
+      skill:// URIs and adds a get_skill tool that fetches them on demand
     """
 
     client: OpenAIClient
@@ -41,6 +49,7 @@ class Agent:
     messages: list[dict[str, Any]]
     tool_schemas: list[dict[str, Any]]
     memory: Optional["MemoryStore"]
+    mcp_servers: list["MCPClient"]
     max_tokens: int
     compaction_threshold: int
     request_timeout: int
@@ -54,6 +63,7 @@ class Agent:
         system_prompt: str = "",
         model: str = "",
         memory: Optional["MemoryStore"] = None,
+        mcp_servers: Optional[list["MCPClient"]] = None,
         max_tokens: int = 32000,
         compaction_threshold: int = 80,
         request_timeout: int = 300,
@@ -70,6 +80,12 @@ class Agent:
             memory: Optional MemoryStore for persistent memory across conversations.
                     When provided, memory tools are automatically added and the
                     system prompt is augmented with memory instructions.
+            mcp_servers: Optional list of MCP clients (scriptling.mcp.Client) whose
+                    tools and skills the agent can use. Each must be created with a
+                    distinct namespace: it prefixes the server's tool names and
+                    routes skill URIs back to the server. MCP Apps tools degrade to
+                    plain text results (an agent loop has no UI host). Close stdio
+                    clients yourself when done; the agent does not own them.
             max_tokens: Maximum token budget for the conversation. When the estimated
                        token count reaches the compaction threshold, the conversation
                        history is automatically summarized. Default: 32000
@@ -80,6 +96,19 @@ class Agent:
                            loops or large contexts. Default: 300
             extra_body: Optional dict of provider-specific fields to merge into
                        every request body. Default: None
+
+        Example:
+            import scriptling.ai as ai
+            import scriptling.mcp as mcp
+            from scriptling.ai.agent import Agent
+
+            client = ai.Client("", api_key="sk-...")
+            shop = mcp.Client("https://shop.example.com/mcp", namespace="shop")
+
+            agent = Agent(client, mcp_servers=[shop], model="gpt-4")
+            response = agent.trigger("Find a blue mug", max_iterations=10)
+            print(response.content)
+            shop.close()
         """
         ...
 

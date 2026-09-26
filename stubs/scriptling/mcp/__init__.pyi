@@ -10,6 +10,15 @@ from typing import Optional, Any
 class MCPClient:
     """MCP client for connecting to remote MCP servers."""
 
+    namespace: str
+    """The client's namespace ("" when created without one).
+
+    Read-only, set at creation. Tool names listed by tools() carry this
+    prefix, and scriptling.ai.agent routes skill URIs back to this server
+    by it, so a client passed to Agent(mcp_servers=[...]) needs a distinct
+    namespace.
+    """
+
     def tools(self) -> list[dict[str, Any]]:
         """
         List available tools.
@@ -293,6 +302,7 @@ def Client(
     *,
     namespace: str = "",
     bearer_token: str = "",
+    timeout: float = 30,
     args: Optional[list[str]] = None,
     env: Optional[list[str]] = None
 ) -> MCPClient:
