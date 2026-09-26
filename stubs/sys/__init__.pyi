@@ -52,6 +52,17 @@ class OutputStream:
 
 platform: str
 version: str
+executable: str
+"""Path of the running interpreter.
+
+Use it to relaunch this very binary as a subprocess instead of relying on
+whatever "scriptling" resolves to on PATH:
+
+    import sys
+    import scriptling.mcp as mcp
+
+    client = mcp.Client(sys.executable, args=["--mcp-exec-script"], namespace="local")
+"""
 maxsize: int
 path_sep: str
 argv: List[str]
