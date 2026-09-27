@@ -557,7 +557,8 @@ def Client(
     max_retries: int = 3,
     retry_backoff: float = 1.0,
     retry_on_rate_limit: bool = True,
-    retry_on_server_error: bool = True
+    retry_on_server_error: bool = True,
+    prompt_caching: bool = True
 ) -> OpenAIClient:
     """
     Create a new AI client.
@@ -578,6 +579,9 @@ def Client(
         retry_backoff: Base backoff in seconds between retries. Default: 1.0
         retry_on_rate_limit: Retry on 429 rate limit errors. Default: True
         retry_on_server_error: Retry on 5xx server errors. Default: True
+        prompt_caching: Claude only: send prompt-caching breakpoints (system prompt,
+            last tool, last message) so repeated prefixes are served from Anthropic's
+            cache. Default: True
 
     Returns:
         Client instance with methods for API calls
