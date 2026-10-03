@@ -253,3 +253,54 @@ def vectorize(text: str, *, dims: int = 256) -> list[float]:
         Normalised vector of length dims.
     """
     ...
+
+
+def sentences(text: str) -> list[str]:
+    """
+    Split text into sentences.
+
+    A sentence ends at ". ", "! " or "? " followed by a capital letter,
+    digit or opening quote (so "e.g. this" and "3.5 mm" stay whole) and at
+    every line break, so transcripts and logs split one line per sentence.
+    Sentences are trimmed; empty ones are dropped.
+
+    Parameters:
+        text  Text to split
+
+    Returns:
+        List of sentences in order.
+    """
+    ...
+
+
+def extract(
+    text: str,
+    *,
+    max_chars: int | None = None,
+    max_sentences: int | None = None,
+    ratio: float | None = None,
+) -> str:
+    """
+    Keep the most informative sentences of a text, in their original order,
+    within the given bounds (CPU-only, no model).
+
+    Sentences are ranked with TextRank over hashed word vectors, so the
+    sentences most representative of the whole text are kept; a sentence
+    that repeats is ranked once and kept at most once. Text that already
+    fits is returned unchanged. Repetitive line-oriented text such
+    as a log is de-duplicated instead, so rare informative lines survive.
+    Use it in place of cutting a long text at a fixed length.
+
+    Parameters:
+        text           The text to shorten
+        max_chars      Keep sentences while the result fits in this many characters
+        max_sentences  Keep at most this many sentences
+        ratio          Keep this fraction of the sentences (0 < ratio <= 1)
+
+    With no bounds, ratio defaults to 0.3. When several bounds are given the
+    tightest applies. A single sentence longer than max_chars is cut to fit.
+
+    Returns:
+        The selected sentences joined with spaces (newlines for line-oriented text).
+    """
+    ...
