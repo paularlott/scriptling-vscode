@@ -204,6 +204,36 @@ class LeaderElection:
         ...
 
 
+class Stream:
+    """
+    A streamed reply returned by Cluster.open_stream(). Use it in a with
+    statement to close it automatically.
+    """
+
+    def read(self, size: int = -1) -> bytes:
+        """Read up to size bytes, or the rest of the reply when size is omitted. Returns b'' at the end; a handler error is raised by the read that reaches it."""
+        ...
+
+    def readline(self) -> bytes:
+        """Read one line including its newline. Returns b'' at the end."""
+        ...
+
+    def close(self) -> None:
+        """Close the stream, abandoning any unread reply."""
+        ...
+
+    def __enter__(self) -> "Stream": ...
+    def __exit__(self, exc_type: Any, exc_val: Any, exc_tb: Any) -> bool: ...
+
+
+class StreamWriter:
+    """The reply writer passed to a handle_stream() handler. Only valid while the handler runs."""
+
+    def write(self, data: str | bytes) -> int:
+        """Send str (as UTF-8) or bytes to the caller. Returns the number of bytes written."""
+        ...
+
+
 class Cluster:
     """
     Gossip cluster object returned by create().
@@ -383,6 +413,57 @@ class Cluster:
                 return {"status": "ok", "echo": msg["payload"]}
 
             cluster.handle_with_reply(128, on_request)
+        """
+        ...
+
+    def open_stream(
+        self,
+        node_id: str,
+        message_type: int,
+        data: object
+    ) -> Stream:
+        """
+        Request a reply of any size from a node's handle_stream() handler.
+
+        Unlike send_request(), the reply is not limited to one packet: use
+        streams for files, state transfers and other bulk data.
+
+        Parameters:
+            node_id: Target node UUID string
+            message_type: Message type integer (must be >= 128)
+            data: Request payload
+
+        Returns:
+            A Stream to read the reply from
+
+        Example:
+            with cluster.open_stream(target_id, 300, {"rows": 3}) as stream:
+                for line in stream.read().decode().splitlines():
+                    print(line)
+        """
+        ...
+
+    def handle_stream(
+        self,
+        message_type: int,
+        handler: Callable[[MessageDict, StreamWriter], Any]
+    ) -> None:
+        """
+        Serve open_stream() requests for a message type.
+
+        The handler receives the same message dict as handle() and a writer.
+        Returning ends the reply; raising sends the error to the caller.
+
+        Parameters:
+            message_type: Message type to serve (must be >= 128)
+            handler: Function called as handler(msg, writer)
+
+        Example:
+            def send_report(msg, writer):
+                for i in range(msg["payload"]["rows"]):
+                    writer.write(f"row {i}\n")
+
+            cluster.handle_stream(300, send_report)
         """
         ...
 
@@ -702,7 +783,9 @@ def create(
         compression: Enable Snappy compression (default: False)
         bearer_token: Authentication bearer token
         app_version: Application version for compatibility checks
-        transport: Transport type: "socket" or "http" (default: "socket")
+        transport: Transport type: "socket" or "http" (default: "socket"). With "http"
+            the node serves gossip over HTTP on bind_addr and advertises
+            http://<bind_addr> unless advertise_addr is set
         compress_min_size: Min message size for compression (default: 256)
         gossip_interval: Gossip interval duration (default: "5s")
         gossip_max_interval: Max gossip interval (default: "20s")

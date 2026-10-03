@@ -4,7 +4,7 @@ Scriptling Random Library - Type stubs for IntelliSense support.
 Random number generation functions. Python-compatible.
 """
 
-from typing import List, Optional, Union
+from typing import List, Optional, Sequence, Union
 
 Number = Union[int, float]
 
@@ -197,12 +197,12 @@ def shuffle(list: List) -> None:
     """
     ...
 
-def sample(population: List, k: int) -> List:
+def sample(population: Sequence, k: int) -> List:
     """
     Return k unique random elements from population.
 
     Parameters:
-        population: List to sample from
+        population: Sequence to sample from (list, tuple, range, str or set)
         k: Number of elements to return
 
     Returns:
@@ -213,6 +213,8 @@ def sample(population: List, k: int) -> List:
 def choices(
     population: List,
     weights: Optional[List[Number]] = None,
+    *,
+    cum_weights: Optional[List[Number]] = None,
     k: int = 1,
 ) -> List:
     """
@@ -221,6 +223,7 @@ def choices(
     Parameters:
         population: List to sample from
         weights: Optional list of weights (must match population length)
+        cum_weights: Optional cumulative weights; give weights or cum_weights, not both
         k: Number of items to select (default: 1)
 
     Returns:

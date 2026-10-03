@@ -14,8 +14,16 @@ class Path:
     def __init__(self, path: str) -> None:
         ...
 
-    def joinpath(self, *other: str) -> "Path":
+    def joinpath(self, *other: "str | Path") -> "Path":
         """Combine this path with other path segments."""
+        ...
+
+    def __truediv__(self, other: "str | Path") -> "Path":
+        """Path("/etc") / "hosts": join a segment, like joinpath()."""
+        ...
+
+    def __str__(self) -> str:
+        """The path as a string."""
         ...
 
     def exists(self) -> bool:
