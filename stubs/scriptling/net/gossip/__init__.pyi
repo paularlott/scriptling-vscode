@@ -777,15 +777,17 @@ def create(
     Parameters:
         bind_addr: Address to bind to (default: "127.0.0.1:8000")
         node_id: Unique node ID (auto-generated if empty)
-        advertise_addr: Address to advertise to peers (default: same as bind_addr)
-        encryption_key: Encryption key (16, 24, or 32 bytes for AES)
+        advertise_addr: Address to advertise to peers (default: same as bind_addr);
+            a URL for the "http" transport, with http:// assumed when no scheme is given
+        encryption_key: Encryption key (16, 24, or 32 bytes for AES); socket transport only
         tags: Tags for tag-based message routing
         compression: Enable Snappy compression (default: False)
         bearer_token: Authentication bearer token
         app_version: Application version for compatibility checks
         transport: Transport type: "socket" or "http" (default: "socket"). With "http"
             the node serves gossip over HTTP on bind_addr and advertises
-            http://<bind_addr> unless advertise_addr is set
+            http://<bind_addr> unless advertise_addr is set; it relies on HTTPS
+            for encryption, and a bind_addr on all interfaces needs advertise_addr
         compress_min_size: Min message size for compression (default: 256)
         gossip_interval: Gossip interval duration (default: "5s")
         gossip_max_interval: Max gossip interval (default: "20s")
