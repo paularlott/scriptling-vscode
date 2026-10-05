@@ -23,6 +23,10 @@ def getcwd() -> str:
     """Return the current working directory."""
     ...
 
+def getpid() -> int:
+    """Return the current process id."""
+    ...
+
 def listdir(path: str = ".") -> List[str]:
     """Return entry names in a directory."""
     ...

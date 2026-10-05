@@ -7,6 +7,10 @@ serialize them back.
 
 from typing import Any, Union
 
+class JSONDecodeError(ValueError):
+    """Raised by loads() on malformed JSON; subclasses ValueError, as in Python."""
+    ...
+
 def loads(json_string: str) -> Any:
     """
     Parse a JSON string into Scriptling values.

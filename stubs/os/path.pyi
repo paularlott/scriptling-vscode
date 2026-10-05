@@ -2,7 +2,7 @@
 Scriptling os.path stubs.
 """
 
-from typing import Tuple
+from typing import List, Tuple
 
 def join(*paths: str) -> str:
     """Join path components."""
@@ -63,4 +63,8 @@ def getsize(path: str) -> int:
 
 def getmtime(path: str) -> float:
     """Return the modification time as a timestamp."""
+    ...
+
+def commonprefix(paths: List[str]) -> str:
+    """Return the longest common leading component of the paths."""
     ...
