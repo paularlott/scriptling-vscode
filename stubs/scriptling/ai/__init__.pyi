@@ -2,7 +2,7 @@
 Scriptling AI Library - Type stubs for IntelliSense support.
 
 This library provides AI and LLM functions for interacting with multiple
-AI provider APIs including OpenAI, Claude, Gemini, Ollama, ZAI, and Mistral.
+AI provider APIs including OpenAI, Claude, Gemini, Ollama, ZAI, Mistral, and Grok.
 """
 
 from typing import Literal, Optional, Any, Callable, Union
@@ -14,9 +14,11 @@ GEMINI: str
 OLLAMA: str
 ZAI: str
 MISTRAL: str
+GROK: str
 
 # Type aliases
-ProviderType = Literal["openai", "claude", "gemini", "ollama", "zai", "mistral"]
+ProviderType = Literal["openai", "claude", "gemini", "ollama", "zai", "mistral", "grok"]
+Capability = Literal["responses", "responses_emulated", "embeddings", "decision"]
 
 class ToolRegistry:
     """
@@ -209,12 +211,34 @@ class OpenAIClient:
         """
         ...
 
+    def supports(self, capability: Capability) -> bool:
+        """
+        Check a client capability.
+
+        "responses" means the provider's native Responses API (OpenAI, Grok);
+        "responses_emulated" means the Responses API emulated over chat
+        completions, with responses stored in this process. Every client reports
+        exactly one of the two. "embeddings" and "decision" report whether
+        embedding() and decide() work.
+
+        Parameters:
+            capability: Capability name
+
+        Returns:
+            True if supported
+        """
+        ...
+
     def response_create(
         self,
         model: str,
         input: Union[str, list[Any]],
         *,
         system_prompt: Optional[str] = None,
+        instructions: Optional[str] = None,
+        previous_response_id: Optional[str] = None,
+        tools: Optional[list[dict[str, Any]]] = None,
+        store: bool = True,
         background: bool = False,
         extra_body: Optional[dict[str, Any]] = None
     ) -> dict[str, Any]:
@@ -225,6 +249,11 @@ class OpenAIClient:
             model: Model identifier (e.g., "gpt-4o", "gpt-4")
             input: Either a string (user message content) or a list of input items
             system_prompt: System prompt to use when input is a string
+            instructions: Instructions for this request (not carried over to later turns)
+            previous_response_id: Continue the conversation of this response
+            tools: Tool definitions, e.g. from ToolRegistry.build(); the model's calls are
+                returned for the script to run (see tool_calls() and tool_outputs())
+            store: Set False to keep nothing: the response can't be retrieved or continued
             background: If true, runs asynchronously and returns immediately
             extra_body: Provider-specific fields to merge into the request body
 
@@ -272,6 +301,10 @@ class OpenAIClient:
         input: Union[str, list[Any]],
         *,
         system_prompt: Optional[str] = None,
+        instructions: Optional[str] = None,
+        previous_response_id: Optional[str] = None,
+        tools: Optional[list[dict[str, Any]]] = None,
+        store: bool = True,
         extra_body: Optional[dict[str, Any]] = None
     ) -> ResponseStream:
         """
@@ -281,6 +314,10 @@ class OpenAIClient:
             model: Model identifier (e.g., "gpt-4o", "gpt-4")
             input: Either a string (user message content) or a list of input items
             system_prompt: System prompt to use when input is a string
+            instructions: Instructions for this request (not carried over to later turns)
+            previous_response_id: Continue the conversation of this response
+            tools: Tool definitions; calls arrive as function_call output items
+            store: Set False to keep nothing: the response can't be retrieved or continued
             extra_body: Provider-specific fields to merge into the request body
 
         Returns:
@@ -288,15 +325,29 @@ class OpenAIClient:
         """
         ...
 
-    def response_compact(self, id: str) -> dict[str, Any]:
+    def response_compact(
+        self,
+        model: str,
+        *,
+        previous_response_id: Optional[str] = None,
+        input: Optional[Union[str, list[Any]]] = None,
+        instructions: Optional[str] = None
+    ) -> dict[str, Any]:
         """
-        Compact a response by removing intermediate reasoning steps.
+        Compact a conversation into a short output to continue from.
+
+        Compacts the conversation of previous_response_id (if given) followed by
+        input. Pass the result's output as the input of the next response_create()
+        call, adding the new message, instead of previous_response_id.
 
         Parameters:
-            id: Response ID to compact
+            model: Model used for compaction
+            previous_response_id: Response whose conversation to compact
+            input: Further conversation to include
+            instructions: Instructions the conversation was run under
 
         Returns:
-            Compacted response object with reasoning removed
+            Compaction dict with id, object ("response.compaction"), output and usage
         """
         ...
 
@@ -565,7 +616,7 @@ def Client(
 
     Parameters:
         base_url: Base URL of the API (defaults to https://api.openai.com/v1 if empty)
-        provider: Provider type. Use constants: OPENAI, CLAUDE, GEMINI, OLLAMA, ZAI, MISTRAL
+        provider: Provider type. Use constants: OPENAI, CLAUDE, GEMINI, OLLAMA, ZAI, MISTRAL, GROK
         api_key: API key for authentication
         max_tokens: Default max_tokens for all requests (Claude defaults to 4096 if not set)
         temperature: Default temperature for all requests (0.0-2.0)
@@ -624,7 +675,7 @@ def text(response: dict[str, Any]) -> str:
     Get text content from response (without thinking blocks).
 
     Parameters:
-        response: Chat completion response from client.completion()
+        response: Response from client.completion() or client.response_create()
 
     Returns:
         The response text with thinking blocks removed
@@ -645,10 +696,11 @@ def thinking(response: dict[str, Any]) -> list[str]:
 
 def tool_calls(response_or_message: Union[dict[str, Any], list[Any]]) -> list[dict[str, Any]]:
     """
-    Extract normalized tool calls from a completion response, message dict, or tool call list.
+    Extract normalized tool calls from a completion response, Responses API response,
+    message dict, or tool call list. For a Responses API response each id is the call_id.
 
     Parameters:
-        response_or_message: Completion response dict, assistant message dict, or tool call list
+        response_or_message: Completion or Responses API response, assistant message dict, or tool call list
 
     Returns:
         List of normalized tool call dicts with id, type, and function fields
@@ -668,6 +720,21 @@ def execute_tool_calls(
 
     Returns:
         List of tool result message dicts with role, tool_call_id, and content
+    """
+    ...
+
+def tool_outputs(tool_results: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    """
+    Convert tool results from execute_tool_calls() into Responses API input items.
+
+    Send them as the input of the next response_create() or response_stream()
+    call, with previous_response_id set to the response that asked for the tools.
+
+    Parameters:
+        tool_results: Tool result dicts with tool_call_id and content
+
+    Returns:
+        List of function_call_output dicts with call_id and output
     """
     ...
 
