@@ -29,19 +29,21 @@ def list(alias: str, path: str) -> list[str]:
     """
     List keys at a path through a host-configured provider alias.
 
-    Returns key names at the given path for Vault, or item titles in a vault for 1Password.
+    Returns key names at the given path for Vault. For 1Password, returns the
+    item titles in a vault, or the field names of an item for "vault/item".
 
     Parameters:
         alias: Registered provider alias such as "prod_vault" or "op"
-        path: Provider-specific path (Vault secret path, or 1Password vault name)
+        path: Provider-specific path (Vault secret path, or a 1Password vault name or vault/item)
 
     Returns:
-        List of key or item name strings
+        List of key, item or field name strings
 
     Example:
         import scriptling.secret as secret
 
         keys = secret.list("prod_vault", "secret/data/app")
         items = secret.list("op", "Engineering")
+        fields = secret.list("op", "Engineering/api-key")
     """
     ...
