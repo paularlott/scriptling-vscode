@@ -100,6 +100,10 @@ class ChatStream:
         """
         Get any error from the stream.
 
+        A stream line over the interpreter's value or memory limit stops the
+        stream with an error starting "AI response too large" (collect_stream()
+        raises it as MemoryError).
+
         Returns:
             Error message, or None if no error
         """
@@ -132,6 +136,10 @@ class ResponseStream:
 
         Returns:
             The next event dict, or None if the stream is complete
+
+        Raises:
+            MemoryError: "AI response too large..." if a stream line exceeds the
+                interpreter's value or memory limit (--max-value-bytes / --memory-limit)
         """
         ...
 
@@ -167,6 +175,10 @@ class OpenAIClient:
 
         Returns:
             Response dict containing id, choices, usage, etc.
+
+        Raises:
+            MemoryError: "AI response too large..." if the response body exceeds the
+                interpreter's value or memory limit (--max-value-bytes / --memory-limit)
         """
         ...
 
@@ -259,6 +271,10 @@ class OpenAIClient:
 
         Returns:
             Response object with id, status, output, usage, etc.
+
+        Raises:
+            MemoryError: "AI response too large..." if the response body exceeds the
+                interpreter's value or memory limit (--max-value-bytes / --memory-limit)
         """
         ...
 
@@ -271,6 +287,10 @@ class OpenAIClient:
 
         Returns:
             Response object with id, status, output, usage, etc.
+
+        Raises:
+            MemoryError: "AI response too large..." if the response body exceeds the
+                interpreter's value or memory limit (--max-value-bytes / --memory-limit)
         """
         ...
 
@@ -348,6 +368,10 @@ class OpenAIClient:
 
         Returns:
             Compaction dict with id, object ("response.compaction"), output and usage
+
+        Raises:
+            MemoryError: "AI response too large..." if the response body exceeds the
+                interpreter's value or memory limit (--max-value-bytes / --memory-limit)
         """
         ...
 
@@ -432,6 +456,10 @@ class OpenAIClient:
             List of response dicts in the same order as messages_list.
             Each dict may include a "retry" key if retries occurred:
             {"attempts": int, "rate_limit_hit": bool, "total_backoff": float}
+
+        Raises:
+            MemoryError: "AI response too large..." if the response body exceeds the
+                interpreter's value or memory limit (--max-value-bytes / --memory-limit)
         """
         ...
 
@@ -468,6 +496,10 @@ class OpenAIClient:
 
         Returns:
             List of response text strings in the same order as messages_list
+
+        Raises:
+            MemoryError: "AI response too large..." if the response body exceeds the
+                interpreter's value or memory limit (--max-value-bytes / --memory-limit)
         """
         ...
 
@@ -756,6 +788,11 @@ def collect_stream(
     Returns:
         Aggregated result dict with content, reasoning, tool_calls, finish_reason, timed_out,
         assistant_message, and error (only present when timed_out is true)
+
+    Raises:
+        MemoryError: "AI response too large..." if a stream line exceeds the
+            interpreter's value or memory limit (--max-value-bytes / --memory-limit);
+            also MemoryError if the aggregated result would exceed those limits
     """
     ...
 
@@ -783,5 +820,32 @@ def estimate_tokens(
             - prompt_tokens (int): Estimated tokens in the request messages
             - completion_tokens (int): Estimated tokens in the response
             - total_tokens (int): Sum of prompt and completion tokens
+    """
+    ...
+
+def cosine_similarity(a: list[float], b: list[float]) -> float:
+    """
+    Compute cosine similarity between two vectors.
+
+    Returns the cosine of the angle between two vectors, ranging from -1.0 (opposite)
+    to 1.0 (identical direction). 0.0 means orthogonal (no similarity).
+
+    Primarily used to compare embedding vectors from client.embedding() to find
+    semantically similar texts.
+
+    Parameters:
+        a: First vector (list of numbers)
+        b: Second vector (list of numbers, same length as a)
+
+    Returns:
+        Cosine similarity score from -1.0 to 1.0
+
+    Example:
+        client = ai.Client("", api_key="sk-...")
+        emb1 = client.embedding("text-embedding-3-small", "Hello world")
+        emb2 = client.embedding("text-embedding-3-small", "Hi world")
+
+        score = ai.cosine_similarity(emb1.data[0].embedding, emb2.data[0].embedding)
+        print(score)  # High similarity (~0.9+)
     """
     ...

@@ -260,6 +260,9 @@ class Cluster:
         Parameters:
             peers: A single address string or list of address strings
 
+        Under a host network policy, connections to denied addresses (and to
+        denied peers learned later from the cluster) are refused.
+
         Example:
             cluster.join("127.0.0.1:8001")
             cluster.join(["127.0.0.1:8001", "127.0.0.1:8002"])
@@ -796,7 +799,7 @@ def create(
         fan_out_multiplier: Fan-out scaling factor (default: 1.0)
         ttl_multiplier: TTL scaling factor (default: 1.0)
         state_exchange_multiplier: State exchange scaling (default: 0.8)
-        force_reliable_transport: Force TCP for all messages (default: False)
+        force_reliable_transport: Force TCP for all messages (default: False; always on under a network policy)
         prefer_ipv6: Prefer IPv6 for DNS resolution (default: False)
         node_cleanup_interval: Dead node cleanup interval (default: "20s")
         node_retention_time: How long to keep dead nodes (default: "1h")

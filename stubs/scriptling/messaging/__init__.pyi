@@ -296,6 +296,10 @@ class MessagingClient:
             filename: Optional filename
             caption: Optional caption
             base64: True if source is base64-encoded data
+
+        Raises:
+            PermissionError: (uncatchable) if source is a local file outside the
+                allowed paths (--allowed-paths)
         """
         ...
 
@@ -333,6 +337,10 @@ class MessagingClient:
 
         Returns:
             Base64-encoded file data
+
+        The bot token is sent only to the platform's own hosts. A URL on
+        any other host is fetched without it and must pass the host's
+        network policy (raising an error if denied).
         """
         ...
 

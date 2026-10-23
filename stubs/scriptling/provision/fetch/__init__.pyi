@@ -52,10 +52,15 @@ def file(
         mode: File permission mode for created files (default 0o644)
         dir_mode: Directory permission mode for created directories (default 0o755)
         provides: List of file paths to check before fetching. If all paths exist,
-            returns UNCHANGED without downloading or extracting (default None)
+            returns UNCHANGED without downloading or extracting; a path that
+            cannot be checked counts as missing (default None)
 
     Returns:
         A dict with status, url, path, bytes, unpacked, and files keys.
         status is fetch.CREATED, fetch.UPDATED, or fetch.UNCHANGED.
+
+    Raises:
+        PermissionError: if dest, a provides path or an unpacked entry is
+            outside the allowed paths (checked before downloading)
     """
     ...

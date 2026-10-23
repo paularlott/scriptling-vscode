@@ -10,13 +10,17 @@ def Client(addr: str, *, token: str = "", insecure: bool = False, timeout: float
     Create a Nomad client.
 
     Parameters:
-        addr (str): Nomad HTTP API address, e.g. "http://127.0.0.1:4646"
+        addr (str): Nomad HTTP API address, e.g. "http://127.0.0.1:4646" (no query or fragment)
         token (str, optional): ACL token, sent as the X-Nomad-Token header. Default: ""
         insecure (bool, optional): Skip TLS certificate verification. Default: False
         timeout (float, optional): Per-request HTTP timeout in seconds. Default: 10
 
     Returns:
         NomadClient: A client instance
+
+    Raises:
+        An error if addr contains a query or fragment. Requests to an address
+        the host's network policy denies raise a network policy error.
 
     Example:
         import scriptling.nomad as nomad

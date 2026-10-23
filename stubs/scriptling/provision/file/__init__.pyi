@@ -2,7 +2,8 @@
 Scriptling Provision File Library - Type stubs for IntelliSense support.
 
 This library provides file provisioning utilities for creating and updating
-files with correct permissions.
+files with correct permissions. Every function raises PermissionError for a
+path outside the allowed paths.
 
 Constants:
     CREATED: Status returned when a file was newly written.

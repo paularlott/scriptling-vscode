@@ -196,6 +196,12 @@ def static(path: str, directory: str) -> None:
         path: URL path prefix for static files (e.g., "/assets")
         directory: Local directory to serve files from
 
+    Raises:
+        PermissionError if the host restricts paths (--allowed-paths) and
+        directory is outside them. Under that restriction the route also
+        refuses files that resolve outside the allowed paths, dotfiles and
+        directory listings (404).
+
     Example:
         runtime.http.static("/assets", "./public")
     """

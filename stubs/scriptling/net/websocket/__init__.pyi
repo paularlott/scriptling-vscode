@@ -180,3 +180,87 @@ def is_binary(message: WebSocketMessage) -> bool:
             print(f"Received {len(data)} bytes")
     """
     ...
+
+
+def send(conn: WebSocketClientConn, message: Union[str, dict[str, Any]]) -> None:
+    """
+    Send a message on a connection.
+
+    Note: This is a module-level placeholder. It does not send anything and
+    always raises an error ("send() requires a connection object - use
+    ws.connect() first, then conn.send()"); use conn.send(message) instead.
+
+    Parameters:
+        conn: Connection returned by connect()
+        message: Text string or dict (will be JSON-encoded)
+
+    Raises:
+        An error, always
+    """
+    ...
+
+
+def send_binary(conn: WebSocketClientConn, data: list[int]) -> None:
+    """
+    Send binary data on a connection.
+
+    Note: This is a module-level placeholder. It does not send anything and
+    always raises an error; use conn.send_binary(data) instead.
+
+    Parameters:
+        conn: Connection returned by connect()
+        data: List of byte values (0-255)
+
+    Raises:
+        An error, always
+    """
+    ...
+
+
+def receive(conn: WebSocketClientConn, timeout: float = 30) -> Optional[WebSocketMessage]:
+    """
+    Receive a message from a connection.
+
+    Note: This is a module-level placeholder. It does not receive anything and
+    always raises an error; use conn.receive(timeout) instead.
+
+    Parameters:
+        conn: Connection returned by connect()
+        timeout: Maximum time to wait for a message (seconds, default: 30)
+
+    Raises:
+        An error, always
+    """
+    ...
+
+
+def connected(conn: WebSocketClientConn) -> bool:
+    """
+    Check if a connection is still open.
+
+    Note: This is a module-level placeholder. It always raises an error; use
+    conn.connected() instead.
+
+    Parameters:
+        conn: Connection returned by connect()
+
+    Raises:
+        An error, always
+    """
+    ...
+
+
+def close(conn: WebSocketClientConn) -> None:
+    """
+    Close a connection.
+
+    Note: This is a module-level placeholder. It does not close the connection
+    and always raises an error; use conn.close() instead.
+
+    Parameters:
+        conn: Connection returned by connect()
+
+    Raises:
+        An error, always
+    """
+    ...

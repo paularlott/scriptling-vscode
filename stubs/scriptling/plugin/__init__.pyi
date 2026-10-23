@@ -98,6 +98,10 @@ def batch_call(library: str, calls: list[BatchCall]) -> list[Any]:
     raw JSON-RPC method. For ``scriptling=True`` clients, each entry is sent as
     a typed plugin ``function.call`` request. Results are returned in the same
     order as ``calls``. Callback arguments are not supported.
+
+    A peer may limit batch size: a scriptling JSON-RPC or plugin server
+    refuses a batch of more than 1,000 calls by default
+    (``--json-rpc-max-batch``), so split larger lists into several calls.
     """
     ...
 
@@ -141,9 +145,11 @@ def load(
     :func:`call_function`, :func:`describe`, and :func:`list`.
 
     Parameters:
-        name: Library name to register under. Normalised into the plugin.*
-            namespace (e.g. "widgets" becomes "plugin.widgets"). Must not
-            collide with an existing plugin library name.
+        name: Library name to register under. A bare name goes in the
+            plugin.* namespace ("widgets" becomes "plugin.widgets"); a dotted
+            name is used verbatim. Names are global, and a name already
+            registered (a built-in, stdlib or host library, or another
+            plugin) is refused.
         path: Filesystem path to the executable, or an HTTP(S) JSON-RPC
             endpoint such as ``"http://127.0.0.1:8000/json-rpc"``.
         scriptling: If ``True``, perform the plugin protocol handshake,
@@ -169,6 +175,15 @@ def load(
         The normalised library name (e.g. "plugin.widgets"). The short form
         ("widgets") may be used with :func:`call_function`, :func:`describe`,
         and :func:`unload`.
+
+    Raises:
+        An error "load(): library X is already registered" if the normalised
+        name is already registered (a built-in, stdlib, host or script
+        library) or is a module the library loader supplies from disk.
+        An error "stdio/executable plugins are not permitted in this scope
+        (http/https only)" if ``path`` is an executable where the host has
+        disabled subprocesses (``--no-subprocess`` /
+        ``--disable-lib subprocess``); only HTTP(S) plugins can be loaded there.
     """
     ...
 

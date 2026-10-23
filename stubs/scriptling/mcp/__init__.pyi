@@ -325,6 +325,10 @@ def Client(
     Passing `args` or `env` with an HTTP URL, or `bearer_token` with a command,
     raises an error.
 
+    A command target (stdio server) is a subprocess: where the host disables
+    subprocesses (--no-subprocess / --disable-lib subprocess) it raises an
+    error, and only HTTP(S) servers can be used.
+
     Returns:
         Client instance with methods for interacting with the server. For
         stdio clients, call close() when done to shut the subprocess down.

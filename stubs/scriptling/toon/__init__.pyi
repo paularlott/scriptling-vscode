@@ -19,6 +19,9 @@ def encode(data: Any) -> str:
     Returns:
         TOON formatted string
 
+    Raises:
+        RecursionError: if data nests more than 10,000 levels deep.
+
     Example:
         text = toon.encode({"name": "Alice", "age": 30})
         # Returns: TOON formatted string
@@ -57,6 +60,9 @@ def encode_options(data: Any, indent: int, delimiter: str) -> str:
 
     Returns:
         TOON formatted string
+
+    Raises:
+        RecursionError: if data nests more than 10,000 levels deep.
 
     Example:
         text = toon.encode_options(data, 4, "|")

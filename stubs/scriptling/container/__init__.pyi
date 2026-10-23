@@ -11,8 +11,9 @@ def runtimes() -> list[str]:
     """
     List available container runtimes.
 
-    Probes each supported runtime and returns the names of those that are
-    currently installed and running on this system.
+    Returns the runtimes Client() can use: "docker" and "podman" when their
+    configured endpoint answers, "apple" when the Apple container CLI is
+    installed at /usr/local/bin/container. Nothing is run to find out.
 
     Returns:
         list[str]: Subset of ["docker", "podman", "apple"]
@@ -36,11 +37,17 @@ def Client(driver: str, *, socket: str = "") -> "ContainerClient":
             - Unix socket URI:   unix:///var/run/docker.sock
             - TCP (Docker only): tcp://192.168.1.10:2375 or 192.168.1.10:2375
             - TLS (Docker only): https://192.168.1.10:2376
-            Defaults to DOCKER_HOST / CONTAINER_HOST env vars (via --docker-sock / --podman-sock CLI flags),
+            Defaults to the host's --docker-host / --podman-host CLI flags (env DOCKER_HOST /
+            CONTAINER_HOST; config container.docker_host / container.podman_host),
             then /var/run/docker.sock or /var/run/podman.sock.
+            A TCP/HTTPS endpoint must not contain a query or fragment.
 
     Returns:
         ContainerClient: A client instance
+
+    Raises:
+        An error if a script-supplied socket is denied by the host's network
+        policy (TCP/HTTPS) or lies outside its allowed paths (Unix socket).
 
     Example:
         import scriptling.container as container
@@ -220,13 +227,20 @@ class ContainerClient:
             name (str, optional): Container name
             ports (list[str], optional): Port mappings e.g. ["8080:80"]
             env (list[str], optional): Environment variables e.g. ["KEY=value"]
-            volumes (list[str], optional): Volume mounts e.g. ["mydata:/data"]
+            volumes (list[str], optional): Volume mounts e.g. ["mydata:/data"] or a host
+                bind ["/srv/app:/app:ro"]; under --allowed-paths a host path must lie
+                within the allowed directories
             command (list[str], optional): Override command e.g. ["/bin/sh", "-c", "echo hi"]
-            network (str, optional): Network name
-            privileged (bool, optional): Run privileged (default False)
+            network (str, optional): Network name; "host" is refused under a network policy
+            privileged (bool, optional): Run privileged (default False); refused where the
+                host sets --container-deny-privileged
 
         Returns:
             str: Container ID
+
+        Raises:
+            PermissionError: (uncatchable) a host bind outside --allowed-paths,
+                network="host" under a network policy, or privileged=True where denied
 
         Example:
             id = c.run("ubuntu:24.04", name="app", env=["DEBUG=1"], volumes=["data:/data"])

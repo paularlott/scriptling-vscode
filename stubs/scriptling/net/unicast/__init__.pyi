@@ -111,6 +111,9 @@ class UDPListener:
         Parameters:
             address: Target address (e.g., "192.168.1.1:8080")
             message: Message to send (string or dict)
+
+        Raises:
+            An error if the host's network policy denies the address
         """
         ...
 
@@ -177,6 +180,9 @@ def connect(
     Returns:
         Connection object with send(), receive(), close(), connected()
         and local_addr, remote_addr properties
+
+    Raises:
+        An error if the host's network policy denies the address
 
     Example:
         import scriptling.net.unicast as uc

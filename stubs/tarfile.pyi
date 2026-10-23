@@ -25,11 +25,11 @@ class TarFile:
         ...
 
     def extract(self, member: str, path: str = ".") -> str:
-        """Extract a single member to path. Returns the extracted file path."""
+        """Extract a single member to path. Returns the extracted file path. Raises MemoryError if a member is larger than the value limit."""
         ...
 
     def extractall(self, path: str = ".") -> list[str]:
-        """Extract all members to path. Returns list of extracted file paths."""
+        """Extract all members to path. Returns list of extracted file paths. Raises MemoryError if a member is larger than the value limit."""
         ...
 
     def add(self, filename: str, arcname: str = "") -> None:

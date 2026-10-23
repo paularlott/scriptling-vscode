@@ -18,6 +18,9 @@ def file(path: str, timeout: int = 30, poll_rate: float = 1.0) -> bool:
 
     Returns:
         True if file exists, False if timeout exceeded
+
+    Raises:
+        PermissionError: if the path is outside the allowed paths
     """
     ...
 
@@ -34,6 +37,9 @@ def dir(path: str, timeout: int = 30, poll_rate: float = 1.0) -> bool:
 
     Returns:
         True if directory exists, False if timeout exceeded
+
+    Raises:
+        PermissionError: if the path is outside the allowed paths
     """
     ...
 
@@ -51,6 +57,9 @@ def port(host: str, port: int, timeout: int = 30, poll_rate: float = 1.0) -> boo
 
     Returns:
         True if port is open, False if timeout exceeded
+
+    Raises:
+        An error if the host's network policy denies the address
     """
     ...
 
@@ -68,6 +77,9 @@ def http(url: str, timeout: int = 30, poll_rate: float = 1.0, status_code: int =
 
     Returns:
         True if endpoint responds with expected status, False if timeout exceeded
+
+    Raises:
+        An error if the host's network policy denies the URL
     """
     ...
 
@@ -85,6 +97,9 @@ def file_content(path: str, content: str, timeout: int = 30, poll_rate: float = 
 
     Returns:
         True if file contains the content, False if timeout exceeded
+
+    Raises:
+        PermissionError: if the path is outside the allowed paths
     """
     ...
 

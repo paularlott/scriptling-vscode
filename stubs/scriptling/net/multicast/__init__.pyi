@@ -105,6 +105,10 @@ def join(
         Group object with send(), receive(), close() methods
         and group_addr, port, local_addr properties
 
+    Raises:
+        An error if the host's network policy denies the group (multicast
+        is denied unless the policy's allow_cidrs grants it)
+
     Example:
         import scriptling.net.multicast as mc
 

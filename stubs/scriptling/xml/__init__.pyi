@@ -18,6 +18,9 @@ def loads(content: str) -> dict:
 
     Returns:
         Nested dict representing the XML document.
+
+    Raises:
+        An error if the XML is malformed or nests more than 1000 levels deep.
     """
     ...
 
@@ -36,5 +39,8 @@ def dumps(data: dict, *, indent: str = "") -> str:
 
     Returns:
         XML-formatted text.
+
+    Raises:
+        An error if data nests more than 1000 levels deep.
     """
     ...

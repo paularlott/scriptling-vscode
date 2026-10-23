@@ -6,6 +6,20 @@ Handlers are referenced by string ("library.function") and run on a fresh,
 isolated evaluator per request, matching runtime.http. The server runs over
 stdio with ``scriptling --json-rpc setup.py`` or over HTTP at ``POST /json-rpc``
 with ``scriptling --server :8000 --json-rpc setup.py``.
+
+Over HTTP the endpoint is same-origin by default: a browser request from
+another origin is refused with 403 before any handler runs. Allowlist a
+browser app with ``--json-rpc-cors-origin``. Clients that send no Origin
+header (curl, servers, plugin clients) are unaffected.
+
+Limits (stdio and HTTP alike):
+    - A batch of more than 1000 elements (``--json-rpc-max-batch``; 0 = the
+      1000 default, negative = unlimited) is answered with a single Invalid
+      Request error (-32600, "batch too large: N elements exceeds the limit
+      of 1000") and none of its elements run.
+    - At most 4 x CPUs handlers run at once across the server
+      (``--json-rpc-concurrency``; 0 = the default, negative = unlimited).
+      Further calls, including batch elements, wait for a free slot.
 """
 
 from typing import Any, Optional, Callable, overload, TypeVar

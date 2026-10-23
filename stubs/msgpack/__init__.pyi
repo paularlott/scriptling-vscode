@@ -16,6 +16,9 @@ def packb(obj: Any) -> bytes:
 
     Returns:
         bytes: the MessagePack-encoded payload.
+
+    Raises:
+        RecursionError: if obj nests more than 10,000 levels deep.
     """
     ...
 

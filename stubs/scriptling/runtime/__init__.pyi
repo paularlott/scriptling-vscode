@@ -18,7 +18,8 @@ class Promise:
     """
     Promise object representing an async operation result.
 
-    Returned by runtime.background() in script mode.
+    Returned by runtime.background(). In server mode the task is queued until
+    the server starts, and the promise resolves once it runs.
     """
 
     def get(self) -> Any:
@@ -86,13 +87,15 @@ def background(
     handler: str,
     *args: Any,
     **kwargs: Any
-) -> Optional[Promise]:
+) -> Promise:
     """
     Register and start a background task.
 
     Registers a background task and starts it immediately in a goroutine
-    (unless in server mode). Returns a Promise object that can be used to
-    wait for completion or get the result.
+    (in server mode it is queued until the server starts). Returns a Promise
+    object that can be used to wait for completion or get the result.
+    Calling background() with the name of a task that is already queued or
+    running starts nothing and returns that task's promise.
 
     Parameters:
         name: Unique name for the background task
@@ -104,9 +107,25 @@ def background(
             serializes script execution so shared access is safe without locks,
             and arguments are passed live (no transferable restriction). When
             False (default) the handler runs in an isolated, parallel copy.
+        daemon (bool, default False): when True, the CLI does not wait for this
+            task at script exit. By default the CLI waits for outstanding
+            background tasks before exiting; pass daemon=True for long-running
+            tasks that must not hold the process open. shared and daemon are
+            control kwargs and are not passed to the handler.
 
     Returns:
-        Promise object (in script mode) or None (in server mode)
+        Promise object (always; in server mode it resolves once the queued task runs)
+
+    Raises:
+        RuntimeError: "background task limit reached: N tasks are queued or
+            running, the limit is M" when the interpreter already has as many
+            tasks queued or running as its background task limit allows
+            (--max-background-tasks, off by default). Under a memory limit each
+            live task also counts about 48 KiB against it; if starting the task
+            would exceed the memory limit the run is stopped ("memory limit
+            exceeded", which a script cannot catch).
+        An error if a non-dotted handler is not a defined function ("function
+            not found: ...") or an argument is not a transferable type.
 
     Example:
         def my_task(x, y, operation="add"):
@@ -115,8 +134,10 @@ def background(
             return x * y
 
         promise = background("calc", "my_task", 10, 5, operation="multiply")
-        if promise:
-            result = promise.get()  # Returns 50
+        result = promise.get()  # Returns 50
+
+        # Long-running task the CLI should not wait for at exit:
+        background("poller", "poll_forever", daemon=True)
 
         # Shared-environment thread over live state:
         state = {"n": 0}

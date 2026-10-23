@@ -57,6 +57,18 @@ RequestException: str
 HTTPError: str
 """Exception type for HTTP error responses (4xx, 5xx)."""
 
+def exceptions() -> dict[str, str]:
+    """
+    Get the exception type names as a dict.
+
+    Unlike Python's requests.exceptions module this is a function. The same
+    names are available as requests.RequestException and requests.HTTPError.
+
+    Returns:
+        {"RequestException": "RequestException", "HTTPError": "HTTPError"}
+    """
+    ...
+
 
 def get(url: str, **kwargs: Any) -> Response:
     """

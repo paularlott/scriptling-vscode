@@ -90,3 +90,7 @@ class Path:
     def glob(self, pattern: str) -> List["Path"]:
         """Return a list of Path objects matching the pattern."""
         ...
+
+
+PathClass = Path
+"""The class of Path objects, e.g. isinstance(p, pathlib.PathClass). pathlib.Path(...) is the constructor."""

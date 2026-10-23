@@ -167,6 +167,9 @@ def open(name: str) -> Storage:
     Returns:
         KV store object with get, set, delete, exists, ttl, keys, clear, close methods.
 
+    Raises:
+        An error if a filesystem path lies outside the host's allowed paths.
+
     Example:
         import scriptling.runtime.kv as kv
 
