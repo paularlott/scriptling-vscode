@@ -109,6 +109,18 @@ class ChatStream:
         """
         ...
 
+    def close(self) -> None:
+        """
+        Stop the stream and release its connection.
+
+        Cancels the request behind the stream. Call it when a script stops
+        reading a stream before the end, so the connection is not held open
+        until the stream is collected; next() returns None afterwards and
+        err() reports no error for the cancellation itself. A stream read to
+        the end, or stopped by an error, releases itself.
+        """
+        ...
+
     def retry(self) -> Optional[dict[str, Any]]:
         """
         Get retry metadata for the stream.
