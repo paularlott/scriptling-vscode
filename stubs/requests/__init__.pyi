@@ -81,6 +81,7 @@ def get(url: str, **kwargs: Any) -> Response:
             headers (dict): HTTP headers to send
             params (dict): Query parameters to append to the URL
             auth (tuple/list): Basic authentication as (username, password)
+            verify (bool | str | None): Verify the server's TLS certificate (default: True); False accepts any certificate, a path names a PEM bundle of CA certificates to trust
 
     Returns:
         Response object
@@ -101,6 +102,7 @@ def post(url: str, data: "Optional[str | bytes]" = None, **kwargs: Any) -> Respo
             headers (dict): HTTP headers to send
             params (dict): Query parameters to append to the URL
             auth (tuple/list): Basic authentication as (username, password)
+            verify (bool | str | None): Verify the server's TLS certificate (default: True); False accepts any certificate, a path names a PEM bundle of CA certificates to trust
 
     Returns:
         Response object
@@ -121,6 +123,7 @@ def put(url: str, data: "Optional[str | bytes]" = None, **kwargs: Any) -> Respon
             headers (dict): HTTP headers to send
             params (dict): Query parameters to append to the URL
             auth (tuple/list): Basic authentication as (username, password)
+            verify (bool | str | None): Verify the server's TLS certificate (default: True); False accepts any certificate, a path names a PEM bundle of CA certificates to trust
 
     Returns:
         Response object
@@ -139,6 +142,7 @@ def delete(url: str, **kwargs: Any) -> Response:
             headers (dict): HTTP headers to send
             params (dict): Query parameters to append to the URL
             auth (tuple/list): Basic authentication as (username, password)
+            verify (bool | str | None): Verify the server's TLS certificate (default: True); False accepts any certificate, a path names a PEM bundle of CA certificates to trust
 
     Returns:
         Response object
@@ -159,6 +163,7 @@ def patch(url: str, data: "Optional[str | bytes]" = None, **kwargs: Any) -> Resp
             headers (dict): HTTP headers to send
             params (dict): Query parameters to append to the URL
             auth (tuple/list): Basic authentication as (username, password)
+            verify (bool | str | None): Verify the server's TLS certificate (default: True); False accepts any certificate, a path names a PEM bundle of CA certificates to trust
 
     Returns:
         Response object
@@ -184,6 +189,7 @@ def parallel(requests: list[dict[str, Any]], max_parallel: int = 4) -> list[Resp
             - params (dict, optional): Query parameters
             - auth (list, optional): Basic auth as [username, password]
             - timeout (int, optional): Timeout in seconds (default: 30)
+            - verify (bool | str | None, optional): Verify the server's TLS certificate (default: True), or a CA bundle path
         max_parallel: Maximum number of concurrent requests (default: 4)
 
     Returns:
