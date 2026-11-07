@@ -21,6 +21,12 @@ class Request:
         query: Query parameters
         path_params: Path parameters captured from route wildcards
         remote_addr: Remote address of the client
+        auth: The authenticated caller when the server requires a credential
+            (--bearer-token / --oidc-issuer): a dict with subject, audience
+            (list), scopes (list), expiry (Unix seconds, or None when the
+            token does not expire) and claims (the access token's JWT claims;
+            empty for the static bearer token, whose subject is "bearer").
+            None when the server has no credential configured.
         context: Dict the middleware can populate to pass data to the
             handler (per-request, unrelated to the KV store)
     """
@@ -33,6 +39,7 @@ class Request:
     path_params: dict[str, str]
     remote_addr: str
     context: dict[str, Any]
+    auth: Optional[dict[str, Any]]
 
     def path_param(self, name: str, default: Optional[Any] = None) -> Any:
         """

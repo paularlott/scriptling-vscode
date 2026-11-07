@@ -173,8 +173,8 @@ def get_request() -> Optional[Request]:
     Get the HTTP request this tool call is being served for.
 
     Returns the same Request object the middleware saw (method, path, headers,
-    query, path_params, remote_addr and the context dict the middleware may
-    have populated), or None when there is no HTTP request — the stdio
+    query, path_params, remote_addr, the authenticated caller in auth and
+    the context dict the middleware may have populated), or None when there is no HTTP request — the stdio
     transports and anywhere else outside a served request.
 
     Example:

@@ -46,6 +46,12 @@ class MCPClient:
         Returns:
             Decoded tool response
 
+        Raises:
+            An error when the server answers with a JSON-RPC error, and when
+            the tool reports a tool execution error (an isError result); the
+            message is "MCP tool error: " followed by the tool's error text.
+            A failed tool is never returned as if it were a result.
+
         Example:
             result = client.call_tool("search", {"query": "golang"})
             print(result)
@@ -139,6 +145,10 @@ class MCPClient:
         Returns:
             Tool response
 
+        Raises:
+            An error on a JSON-RPC error or a tool execution error (isError),
+            as call_tool() does.
+
         Example:
             result = client.execute_discovered("custom_tool", {"param": "value"})
         """
@@ -159,7 +169,10 @@ class MCPClient:
 
         Returns:
             List of dicts with "name", "result", and "error" keys.
-            "error" is an empty string on success.
+            "error" is an empty string on success; for a JSON-RPC error or a
+            tool execution error (isError) it holds the message ("MCP tool
+            error: ..." for the latter) and "result" is None. One failed call
+            does not raise.
 
         Example:
             results = client.call_tools_parallel([
@@ -189,7 +202,10 @@ class MCPClient:
 
         Returns:
             List of dicts with "name", "result", and "error" keys.
-            "error" is an empty string on success.
+            "error" is an empty string on success; for a JSON-RPC error or a
+            tool execution error (isError) it holds the message ("MCP tool
+            error: ..." for the latter) and "result" is None. One failed call
+            does not raise.
 
         Example:
             results = client.execute_discovered_parallel([
@@ -366,6 +382,10 @@ def decode_response(response: dict[str, Any]) -> Any:
 
     Returns:
         Decoded response (parsed JSON or string)
+
+    Raises:
+        An error ("MCP tool error: <text>") when the dict has isError (or
+        is_error) set to True.
 
     Example:
         decoded = decode_response(raw_response)
