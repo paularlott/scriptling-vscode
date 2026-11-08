@@ -289,3 +289,26 @@ def return_error(message: str) -> None:
         mcp.tool.return_error("Invalid input: project ID is required")
     """
     ...
+
+def progress(progress: float, total: Optional[float] = None, message: Optional[str] = None) -> None:
+    """
+    Report progress to the MCP client.
+
+    Sends a notifications/progress message for the request this tool, prompt
+    or resource handler is serving, so a client can show how far a
+    long-running call has got. Does nothing when the client didn't ask for
+    progress (it sent no progressToken), and nothing after the request has
+    been answered. Calls closer together than the server's rate limit (10ms)
+    are dropped, except the one that reaches total.
+
+    Parameters:
+        progress: Work done so far; must increase with every call
+        total: Total amount of work, when known
+        message: Human-readable status
+
+    Example:
+        for i, item in enumerate(items):
+            process(item)
+            mcp.tool.progress(i + 1, total=len(items), message="Processed " + item)
+    """
+    ...

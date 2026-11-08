@@ -17,6 +17,16 @@ interface FieldSpec {
     documentation: string;
 }
 
+/** Shared description of a completer function, for the completion/complete fields. */
+const COMPLETER_DOC =
+    'A completer is called as `fn(argument, value, context)` — the name being completed, the partial value typed ' +
+    'so far, and a dict of the arguments already filled in — and returns a list of suggestion strings (the client ' +
+    'gets at most 100).';
+
+/** Shared note on the behaviour hints (the spec's tool annotations). */
+const HINT_NOTE =
+    'Hints tell clients how careful to be (for example, to ask before a destructive call); they are not access control.';
+
 /** Top-level scalar fields of a tool `.toml`. */
 const ROOT_FIELDS: FieldSpec[] = [
     {
@@ -39,6 +49,45 @@ const ROOT_FIELDS: FieldSpec[] = [
             'Registration mode. `false` (default, native mode): the tool appears in `tools/list` and can be ' +
             'called directly. `true` (discovery mode): the tool is hidden from `tools/list`, searchable via ' +
             '`tool_search`, and callable via `execute_tool`.'
+    },
+    {
+        label: 'title',
+        insertText: 'title = "$1"',
+        detail: 'string (optional)',
+        documentation: 'Human-readable display name for the tool, shown by clients in place of its name (the spec\'s `title`).'
+    },
+    {
+        label: 'read_only',
+        insertText: 'read_only = ${1|true,false|}',
+        detail: 'boolean (optional, unset by default)',
+        documentation:
+            'Behaviour hint (`annotations.readOnlyHint`): `true` if the tool does not modify its environment. ' +
+            'Unset, clients assume it may. ' + HINT_NOTE
+    },
+    {
+        label: 'destructive',
+        insertText: 'destructive = ${1|true,false|}',
+        detail: 'boolean (optional, unset by default)',
+        documentation:
+            'Behaviour hint (`annotations.destructiveHint`): `true` if the tool may delete or overwrite data, ' +
+            '`false` if it only adds. Unset, clients assume it may be destructive. ' + HINT_NOTE
+    },
+    {
+        label: 'idempotent',
+        insertText: 'idempotent = ${1|true,false|}',
+        detail: 'boolean (optional, unset by default)',
+        documentation:
+            'Behaviour hint (`annotations.idempotentHint`): `true` if calling it again with the same arguments ' +
+            'has no further effect. Unset, clients assume it is not idempotent. ' + HINT_NOTE
+    },
+    {
+        label: 'open_world',
+        insertText: 'open_world = ${1|true,false|}',
+        detail: 'boolean (optional, unset by default)',
+        documentation:
+            'Behaviour hint (`annotations.openWorldHint`): `true` if the tool talks to external systems (the web, ' +
+            'third-party APIs), `false` if it stays within a closed domain. Unset, clients assume open world. ' +
+            HINT_NOTE
     }
 ];
 
@@ -61,6 +110,21 @@ const ROOT_TABLES: FieldSpec[] = [
             'plain text. `resourceUri` and `visibility` are each optional, but at least one must be present — ' +
             'an `"app"`-only action tool (e.g. a form submission, only ever called by a view that\'s already ' +
             'open) typically declares `visibility` alone, with no `resourceUri` of its own.'
+    },
+    {
+        label: '[[arguments]]',
+        insertText: '[[arguments]]\nname = "$1"\ndescription = "$2"\nrequired = ${3|true,false|}\n',
+        detail: 'array of tables (prompts only)',
+        documentation: 'Declares one argument of a prompt (`prompts/*.toml`). Repeat `[[arguments]]` for each argument.'
+    },
+    {
+        label: '[complete]',
+        insertText: '[complete]\n${1:variable} = "${2:module.function}"\n',
+        detail: 'table (resource templates only)',
+        documentation:
+            'Completers for `completion/complete`, keyed by URI template variable, in a resource template\'s ' +
+            '`_{stem}.toml` sidecar. Each value is a `"module.function"` reference resolved through the library dirs. ' +
+            COMPLETER_DOC
     },
     {
         label: '[[icons]]',
@@ -92,6 +156,31 @@ const PARAMETER_FIELDS: FieldSpec[] = [
         insertText: 'required = ${1|true,false|}',
         detail: 'boolean (optional, default false)',
         documentation: 'Whether the parameter must be provided.'
+    }
+];
+
+/** Fields inside a prompt's `[[arguments]]` entry. */
+const ARGUMENT_FIELDS: FieldSpec[] = [
+    { label: 'name', insertText: 'name = "$1"', detail: 'string (required)', documentation: 'Argument name.' },
+    {
+        label: 'description',
+        insertText: 'description = "$1"',
+        detail: 'string (optional)',
+        documentation: 'Description of the argument.'
+    },
+    {
+        label: 'required',
+        insertText: 'required = ${1|true,false|}',
+        detail: 'boolean (optional, default false)',
+        documentation: 'Whether the argument must be provided.'
+    },
+    {
+        label: 'complete',
+        insertText: 'complete = "${1:module.function}"',
+        detail: 'string (optional)',
+        documentation:
+            'Completer for this argument (`completion/complete`): a `"module.function"` reference resolved through ' +
+            'the library dirs. ' + COMPLETER_DOC
     }
 ];
 
@@ -232,6 +321,10 @@ export class ToolMetadataCompletionProvider implements vscode.CompletionItemProv
 
         if (table === 'icons') {
             return ICON_FIELDS.map(f => toCompletionItem(f, vscode.CompletionItemKind.Property));
+        }
+
+        if (table === 'arguments') {
+            return ARGUMENT_FIELDS.map(f => toCompletionItem(f, vscode.CompletionItemKind.Property));
         }
 
         if (table === undefined) {

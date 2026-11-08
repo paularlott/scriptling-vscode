@@ -5,7 +5,7 @@ This library provides MCP (Model Context Protocol) tool interaction functionalit
 for connecting to MCP servers and executing tools.
 """
 
-from typing import Optional, Any
+from typing import Any, Optional, Union
 
 class MCPClient:
     """MCP client for connecting to remote MCP servers."""
@@ -298,6 +298,39 @@ class MCPClient:
             out = client.get_prompt("write_script", {"task": "greet a user"})
             for m in out["messages"]:
                 print(m["role"], m["content"])
+        """
+        ...
+
+    def complete(
+        self,
+        ref: Union[str, dict[str, str]],
+        argument: str,
+        value: str = "",
+        context: Optional[dict[str, str]] = None,
+    ) -> dict[str, Any]:
+        """
+        Ask the server for argument completions (completion/complete).
+
+        Suggests values for a prompt argument or a resource template
+        variable, for example to autocomplete input.
+
+        Parameters:
+            ref: What to complete: a prompt name, a resource template URI
+                (anything containing "://"), or the spec's dict
+                {"type": "ref/prompt", "name": ...} /
+                {"type": "ref/resource", "uri": ...}
+            argument: The argument (or template variable) to complete
+            value: The partial value typed so far
+            context: Arguments already filled in, name -> value
+
+        Returns:
+            dict with "values" (list of str, at most 100), "total" (int or
+            None) and "hasMore" (bool)
+
+        Example:
+            out = client.complete("review_code", "language", "py")
+            print(out["values"])          # ["python"]
+            out = client.complete("docs://{path}", "path", "in")
         """
         ...
 
