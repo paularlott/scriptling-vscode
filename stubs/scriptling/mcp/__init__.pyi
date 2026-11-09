@@ -24,14 +24,23 @@ class MCPClient:
         List available tools.
 
         Returns:
-            List of tool dicts with name, description, inputSchema, is_app.
+            List of tool dicts with name, title, description, inputSchema,
+            is_app, read_only, destructive, idempotent, open_world.
             is_app is True when the tool is an MCP Apps view (linked to a
             ui:// resource): a host UI renders its view when it is called.
+            title is the tool's display name ("" when none). read_only,
+            destructive, idempotent and open_world are the server's
+            behaviour hints, named as mcp.tool declares them: True, False,
+            or None when the server did not state one (treat a None
+            destructive or open_world as True). They are the server's
+            claims, not guarantees.
 
         Example:
             tools = client.tools()
             for tool in tools:
                 print(tool.name + ": " + tool.description)
+                if tool.destructive != False and not tool.read_only:
+                    print("  may make destructive changes")
         """
         ...
 
