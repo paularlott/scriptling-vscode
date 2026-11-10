@@ -2,8 +2,13 @@
 Scriptling Provision File Library - Type stubs for IntelliSense support.
 
 This library provides file provisioning utilities for creating and updating
-files with correct permissions. Every function raises PermissionError for a
-path outside the allowed paths.
+files with correct permissions and owners. Every function raises
+PermissionError for a path outside the allowed paths, and for become=True where
+running as root is not allowed.
+
+Every function takes become=True to run as root, for files a user cannot
+write (in /etc, say), through sudo. The scriptling CLI refuses it with
+--deny-become.
 
 Constants:
     CREATED: Status returned when a file was newly written.
@@ -19,7 +24,11 @@ Example:
     status = file.ensure("~/.gitconfig", "[user]\\nname = Jane\\n", mode=0o600)
     if status == file.CREATED:
         print("File created")
+
+    file.ensure("/etc/app/app.conf", "port = 8080\n", owner="app", become=True)
 """
+
+from typing import Optional, Union
 
 CREATED: str
 UPDATED: str
@@ -29,13 +38,25 @@ ABSENT: str
 EXISTS: str
 
 
-def ensure(path: str, content: str, mode: int = 0o644, create_only: bool = False) -> str:
+def ensure(
+    path: str,
+    content: str,
+    mode: int = 0o644,
+    create_only: bool = False,
+    owner: Optional[Union[str, int]] = None,
+    group: Optional[Union[str, int]] = None,
+    become: bool = False,
+) -> str:
     """
     Ensure a file exists with the given content.
 
     Creates parent directories if needed. If the file already exists with the
     same content, it is left unchanged. Otherwise the file is written with the
     specified mode.
+
+    When mode, owner or group is given, an existing file with the right
+    content is given them too, and the call returns file.UPDATED if that
+    changed anything.
 
     When create_only is True, an existing file is never modified: the call
     returns file.UNCHANGED without writing, even if the content differs. New
@@ -46,6 +67,12 @@ def ensure(path: str, content: str, mode: int = 0o644, create_only: bool = False
         content: File contents
         mode: File permission mode (default 0o644)
         create_only: If True, never modify an existing file (default False)
+        owner: The file's owner, by name or uid. Default: a new file belongs to
+            whoever writes it (root with become=True); an existing one keeps its owner
+        group: The file's group, by name or gid. Default: as for owner
+        become: Run as root (default False), through sudo: asked once, without
+            a password where sudo allows that. The scriptling CLI refuses it
+            with --deny-become
 
     Returns:
         file.CREATED, file.UPDATED, or file.UNCHANGED
@@ -53,7 +80,7 @@ def ensure(path: str, content: str, mode: int = 0o644, create_only: bool = False
     ...
 
 
-def absent(path: str) -> str:
+def absent(path: str, become: bool = False) -> str:
     """
     Ensure a file does not exist.
 
@@ -61,6 +88,7 @@ def absent(path: str) -> str:
 
     Parameters:
         path: Path to the file (supports ~ expansion)
+        become: Run as root (default False)
 
     Returns:
         file.REMOVED if the file was deleted,
@@ -69,24 +97,39 @@ def absent(path: str) -> str:
     ...
 
 
-def ensure_directory(path: str, mode: int = 0o755) -> str:
+def ensure_directory(
+    path: str,
+    mode: int = 0o755,
+    owner: Optional[Union[str, int]] = None,
+    group: Optional[Union[str, int]] = None,
+    become: bool = False,
+) -> str:
     """
     Ensure a directory exists.
 
-    Creates the directory and all parent directories if needed.
+    Creates the directory and all parent directories if needed. When mode,
+    owner or group is given, the directory gets exactly them, whether it is
+    new or not; parent directories it creates get the defaults.
 
     Parameters:
         path: Path to the directory (supports ~ expansion)
         mode: Directory permission mode (default 0o755)
+        owner: The file's owner, by name or uid. Default: a new file belongs to
+            whoever writes it (root with become=True); an existing one keeps its owner
+        group: The file's group, by name or gid. Default: as for owner
+        become: Run as root (default False), through sudo: asked once, without
+            a password where sudo allows that. The scriptling CLI refuses it
+            with --deny-become
 
     Returns:
         file.CREATED if the directory was newly created,
-        file.EXISTS if the directory already existed
+        file.UPDATED if it existed and its mode or owner was changed,
+        file.EXISTS if the directory already existed as it should be
     """
     ...
 
 
-def absent_directory(path: str) -> str:
+def absent_directory(path: str, become: bool = False) -> str:
     """
     Ensure an empty directory does not exist.
 
@@ -95,6 +138,7 @@ def absent_directory(path: str) -> str:
 
     Parameters:
         path: Path to the directory (supports ~ expansion)
+        become: Run as root (default False)
 
     Returns:
         file.REMOVED if the directory was deleted,
@@ -112,6 +156,9 @@ def ensure_block(
     insert_after: str = "",
     mode: int = 0o644,
     create_only: bool = False,
+    owner: Optional[Union[str, int]] = None,
+    group: Optional[Union[str, int]] = None,
+    become: bool = False,
 ) -> str:
     """
     Maintain a marker-delimited block within a file.
@@ -140,8 +187,14 @@ def ensure_block(
         comment: Comment prefix used to build markers (default "#")
         position: Where to insert a new block: "end" (default) or "start"
         insert_after: Substring anchor; new block inserted after first match
-        mode: File permission mode used when creating the file (default 0o644)
+        mode: File permission mode used when writing the file (default 0o644)
         create_only: If True, never modify an existing block (default False)
+        owner: The file's owner, by name or uid. Default: a new file belongs to
+            whoever writes it (root with become=True); an existing one keeps its owner
+        group: The file's group, by name or gid. Default: as for owner
+        become: Run as root (default False), through sudo: asked once, without
+            a password where sudo allows that. The scriptling CLI refuses it
+            with --deny-become
 
     Returns:
         file.CREATED, file.UPDATED, or file.UNCHANGED
@@ -149,7 +202,7 @@ def ensure_block(
     ...
 
 
-def absent_block(path: str, id: str = "managed", comment: str = "#") -> str:
+def absent_block(path: str, id: str = "managed", comment: str = "#", become: bool = False) -> str:
     """
     Remove a managed block.
 
@@ -161,6 +214,7 @@ def absent_block(path: str, id: str = "managed", comment: str = "#") -> str:
         path: Path to the file (supports ~ expansion)
         id: Block identifier embedded in the markers (default "managed")
         comment: Comment prefix used to build markers (default "#")
+        become: Run as root (default False)
 
     Returns:
         file.REMOVED if the block was deleted,

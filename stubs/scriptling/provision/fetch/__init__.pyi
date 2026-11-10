@@ -17,7 +17,7 @@ Example:
         print("updated", result["files"])
 """
 
-from typing import Any
+from typing import Any, Optional, Union
 
 CREATED: str
 UPDATED: str
@@ -34,6 +34,9 @@ def file(
     mode: int = 0o644,
     dir_mode: int = 0o755,
     provides: list[str] = None,
+    owner: Optional[Union[str, int]] = None,
+    group: Optional[Union[str, int]] = None,
+    become: bool = False,
 ) -> dict[str, Any]:
     """
     Fetch a file over HTTP or HTTPS.
@@ -54,6 +57,12 @@ def file(
         provides: List of file paths to check before fetching. If all paths exist,
             returns UNCHANGED without downloading or extracting; a path that
             cannot be checked counts as missing (default None)
+        owner: Owner of the written files (and directories unpacked), by name
+            or uid. Default: new files belong to whoever writes them; existing
+            ones keep their owner
+        group: Their group, by name or gid. Default: as for owner
+        become: Write as root (default False); the download itself runs as the
+            script's user. The scriptling CLI refuses it with --deny-become
 
     Returns:
         A dict with status, url, path, bytes, unpacked, and files keys.
@@ -61,6 +70,7 @@ def file(
 
     Raises:
         PermissionError: if dest, a provides path or an unpacked entry is
-            outside the allowed paths (checked before downloading)
+            outside the allowed paths (checked before downloading), or for
+            become=True where running as root is not allowed
     """
     ...
