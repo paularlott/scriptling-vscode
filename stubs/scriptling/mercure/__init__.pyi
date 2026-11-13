@@ -251,6 +251,10 @@ class MercureClient:
 
         Returns:
             Subscription
+
+        Raises:
+            RuntimeError: When the host lets scripts publish only; catch it
+                to carry on without subscribing
         """
         ...
 
