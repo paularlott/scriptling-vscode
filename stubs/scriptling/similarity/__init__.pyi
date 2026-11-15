@@ -116,7 +116,9 @@ def score(s1: str, s2: str) -> float:
     Calculate similarity score between two strings.
 
     Uses normalized Levenshtein distance. Returns a value between
-    0.0 (completely different) and 1.0 (identical).
+    0.0 (completely different) and 1.0 (identical). Takes time in
+    proportion to the product of the lengths, and stops at the call's
+    deadline.
 
     Parameters:
         s1: First string

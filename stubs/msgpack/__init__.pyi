@@ -19,6 +19,8 @@ def packb(obj: Any) -> bytes:
 
     Raises:
         RecursionError: if obj nests more than 10,000 levels deep.
+        MemoryError: if the encoded value would pass the interpreter's value
+            limit or the memory left.
     """
     ...
 

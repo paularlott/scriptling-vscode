@@ -40,6 +40,13 @@ class Set:
         Returns:
             Rendered string
 
+        Raises:
+            MemoryError: if the data or the rendered text passes the
+                interpreter's value or memory limit.
+
+        Rendering stops at the call's deadline, checked between loop
+        iterations even when nothing is written.
+
         Example:
             # Anonymous template
             tmpl.render({"Name": "Alice"})

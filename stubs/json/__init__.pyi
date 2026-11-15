@@ -67,6 +67,11 @@ def dumps(
         json.dumps({"a": "é"}, ensure_ascii=False)           # '{"a": "é"}'
         json.dumps({"a": [1, 2]}, indent=2)                  # newlines, two-space indent
         json.dumps({"a": [1, 2]}, indent="  ")               # same, string indent verbatim
+
+    Raises:
+        MemoryError: if the text (indentation included) grows past the
+            interpreter's value limit, or its memory limit when that is
+            lower; encoding stops as soon as it does.
     """
     ...
 
