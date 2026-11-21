@@ -758,6 +758,11 @@ def execute_tool_calls(
     """
     Execute normalized tool calls using handlers from a ToolRegistry.
 
+    A call missing a required parameter does not reach its handler: its
+    result is an "Error: ..." message naming the missing parameters and the
+    ones the tool accepts. An unknown tool or a failing handler also gives an
+    "Error: ..." result rather than raising.
+
     Parameters:
         registry: Tool registry containing handlers
         tool_calls: Tool call dicts, typically from tool_calls(...)

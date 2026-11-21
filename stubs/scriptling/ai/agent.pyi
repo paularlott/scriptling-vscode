@@ -29,6 +29,12 @@ class Agent:
     An agent maintains conversation state and can execute tools
     in an agentic loop until a response is ready.
 
+    Tool calls are checked before they run: a call missing a required
+    parameter is answered with a message naming the parameters the tool
+    accepts, so the model can correct it. A tool result too large for the
+    context budget is shortened to its start and end, and a call repeated
+    with the same arguments and the same result is pointed out to the model.
+
     When a memory store is provided, the agent automatically:
     - Adds memory tools (memory_remember, memory_recall, memory_forget)
     - Appends memory instructions to the system prompt
@@ -54,6 +60,10 @@ class Agent:
     compaction_threshold: int
     request_timeout: int
     extra_body: Optional[dict[str, Any]]
+    stop_reason: str
+    """Why the last trigger() stopped: "done" (the model answered),
+    "max_iterations" (the tool-call limit was reached and the model was asked
+    for a final answer) or "no_response"."""
 
     def __init__(
         self,
@@ -86,9 +96,12 @@ class Agent:
                     routes skill URIs back to the server. MCP Apps tools degrade to
                     plain text results (an agent loop has no UI host). Close stdio
                     clients yourself when done; the agent does not own them.
-            max_tokens: Maximum token budget for the conversation. When the estimated
-                       token count reaches the compaction threshold, the conversation
-                       history is automatically summarized. Default: 32000
+            max_tokens: Token budget for the conversation: set it to the model's
+                       context window. When the estimated token count (messages
+                       plus tool schemas) reaches the compaction threshold, the
+                       older part of the history is summarized and the most
+                       recent messages are kept as they are. A single tool result
+                       is limited to a quarter of this budget. Default: 32000
             compaction_threshold: Percentage of max_tokens at which auto-compaction
                                  triggers (0-100). Default: 80
             request_timeout: Timeout in seconds for each LLM completion request.
@@ -116,7 +129,7 @@ class Agent:
         self,
         message: Union[str, dict[str, Any]],
         *,
-        max_iterations: int = 1
+        max_iterations: int = 25
     ) -> Message:
         """
         Trigger the agent with a message and run the agentic loop.
@@ -127,10 +140,14 @@ class Agent:
         3. Execute any tool calls
         4. Repeat until no more tool calls or max_iterations reached
 
+        If max_iterations is reached while the model is still calling tools,
+        the agent makes one more request, without tools, asking the model to
+        answer from what it has found. stop_reason is then "max_iterations".
+
         Parameters:
             message: Either a string (user message) or a message dict
                      with "role" and "content" keys
-            max_iterations: Maximum number of agentic loop iterations. Default: 1
+            max_iterations: Maximum number of tool call rounds. Default: 25
 
         Returns:
             The final message from the agent (content field has thinking blocks removed)
@@ -171,6 +188,8 @@ class Agent:
         - Shows tool call and result messages with status and preview
         - Uses ai.collect_stream() for streaming with configurable timeouts
         - Preserves conversation history between turns
+        - Keeps the tool calls that already ran when a turn is interrupted
+          with Esc, fails or stalls, and notes that it was cut short
 
         Built-in commands: /clear, /model, /history, /exit
 
