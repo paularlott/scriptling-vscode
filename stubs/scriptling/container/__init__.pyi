@@ -259,7 +259,7 @@ class ContainerClient:
         """
         ...
 
-    def wait_stopped(self, name_or_id: str, *, timeout: int = 30) -> bool:
+    def wait_stopped(self, name_or_id: str, *, timeout: float = 30) -> bool:
         """
         Wait for a container to reach a stopped state.
 
@@ -270,7 +270,7 @@ class ContainerClient:
 
         Parameters:
             name_or_id (str): Container name or ID
-            timeout (int, optional): Maximum time to wait in seconds (default 30)
+            timeout (int or float, optional): Maximum time to wait in seconds (default 30)
 
         Returns:
             bool: True if the container is stopped, False if the timeout was reached

@@ -46,7 +46,7 @@ class Connection:
         """
         ...
 
-    def receive(self, timeout: float = 30) -> Optional[dict]:
+    def receive(self, timeout: Optional[float] = 30) -> Optional[dict]:
         """
         Receive a message from the remote peer.
 
@@ -92,7 +92,7 @@ class UDPListener:
     Provides methods for receiving from any sender and replying.
     """
 
-    def receive(self, timeout: float = 30) -> Optional[dict]:
+    def receive(self, timeout: Optional[float] = 30) -> Optional[dict]:
         """
         Receive a message from any sender.
 
@@ -134,7 +134,7 @@ class TCPListener:
     Provides methods for accepting incoming connections.
     """
 
-    def accept(self, timeout: float = 30) -> Optional[Connection]:
+    def accept(self, timeout: Optional[float] = 30) -> Optional[Connection]:
         """
         Accept an incoming TCP connection.
 

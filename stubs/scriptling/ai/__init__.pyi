@@ -84,12 +84,12 @@ class ChatStream:
         """
         ...
 
-    def next_timeout(self, timeout: int) -> Optional[dict[str, Any]]:
+    def next_timeout(self, timeout: Optional[float]) -> Optional[dict[str, Any]]:
         """
         Get the next chunk from the stream, but stop waiting after a timeout.
 
         Parameters:
-            timeout: Timeout in seconds
+            timeout: Timeout in seconds; None or 0 waits without one
 
         Returns:
             The next response chunk, {"timed_out": True}, or None if the stream is complete
@@ -169,7 +169,7 @@ class OpenAIClient:
         top_p: Optional[float] = None,
         max_tokens: Optional[int] = None,
         extra_body: Optional[dict[str, Any]] = None,
-        timeout: Optional[int] = None
+        timeout: Optional[float] = None
     ) -> dict[str, Any]:
         """
         Create a chat completion.
@@ -205,7 +205,7 @@ class OpenAIClient:
         top_p: Optional[float] = None,
         max_tokens: Optional[int] = None,
         extra_body: Optional[dict[str, Any]] = None,
-        timeout: Optional[int] = None
+        timeout: Optional[float] = None
     ) -> ChatStream:
         """
         Create a streaming chat completion.
@@ -444,7 +444,7 @@ class OpenAIClient:
         top_p: Optional[float] = None,
         max_tokens: Optional[int] = None,
         extra_body: Optional[dict[str, Any]] = None,
-        timeout: Optional[int] = None
+        timeout: Optional[float] = None
     ) -> list[dict[str, Any]]:
         """
         Run multiple chat completions in parallel with adaptive concurrency.
@@ -487,7 +487,7 @@ class OpenAIClient:
         top_p: Optional[float] = None,
         max_tokens: Optional[int] = None,
         extra_body: Optional[dict[str, Any]] = None,
-        timeout: Optional[int] = None
+        timeout: Optional[float] = None
     ) -> list[str]:
         """
         Run multiple ask completions in parallel with adaptive concurrency.
@@ -527,7 +527,7 @@ class OpenAIClient:
         top_p: Optional[float] = None,
         max_tokens: Optional[int] = None,
         extra_body: Optional[dict[str, Any]] = None,
-        timeout: Optional[int] = None
+        timeout: Optional[float] = None
     ) -> "Pipeline":
         """
         Create a streaming completion pipeline.
@@ -790,8 +790,8 @@ def tool_outputs(tool_results: list[dict[str, Any]]) -> list[dict[str, Any]]:
 def collect_stream(
     stream: ChatStream,
     *,
-    chunk_timeout: Optional[int] = None,
-    first_chunk_timeout: Optional[int] = None,
+    chunk_timeout: Optional[float] = None,
+    first_chunk_timeout: Optional[float] = None,
     on_event: Optional[Callable[[dict[str, Any]], Any]] = None
 ) -> dict[str, Any]:
     """

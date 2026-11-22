@@ -77,7 +77,7 @@ def get(url: str, **kwargs: Any) -> Response:
     Parameters:
         url: The URL to request
         **kwargs: Optional arguments
-            timeout (int): Request timeout in seconds (default: 5)
+            timeout (int, float or None): Request timeout in seconds, None for none (default: 5)
             headers (dict): HTTP headers to send
             params (dict): Query parameters to append to the URL
             auth (tuple/list): Basic authentication as (username, password)
@@ -98,7 +98,7 @@ def post(url: str, data: "Optional[str | bytes]" = None, **kwargs: Any) -> Respo
         data: Request body as string or bytes (optional)
         **kwargs: Optional arguments
             json (dict/list): JSON-encode as request body (sets Content-Type)
-            timeout (int): Request timeout in seconds (default: 5)
+            timeout (int, float or None): Request timeout in seconds, None for none (default: 5)
             headers (dict): HTTP headers to send
             params (dict): Query parameters to append to the URL
             auth (tuple/list): Basic authentication as (username, password)
@@ -119,7 +119,7 @@ def put(url: str, data: "Optional[str | bytes]" = None, **kwargs: Any) -> Respon
         data: Request body as string or bytes (optional)
         **kwargs: Optional arguments
             json (dict/list): JSON-encode as request body (sets Content-Type)
-            timeout (int): Request timeout in seconds (default: 5)
+            timeout (int, float or None): Request timeout in seconds, None for none (default: 5)
             headers (dict): HTTP headers to send
             params (dict): Query parameters to append to the URL
             auth (tuple/list): Basic authentication as (username, password)
@@ -138,7 +138,7 @@ def delete(url: str, **kwargs: Any) -> Response:
     Parameters:
         url: The URL to request
         **kwargs: Optional arguments
-            timeout (int): Request timeout in seconds (default: 5)
+            timeout (int, float or None): Request timeout in seconds, None for none (default: 5)
             headers (dict): HTTP headers to send
             params (dict): Query parameters to append to the URL
             auth (tuple/list): Basic authentication as (username, password)
@@ -159,7 +159,7 @@ def patch(url: str, data: "Optional[str | bytes]" = None, **kwargs: Any) -> Resp
         data: Request body as string or bytes (optional)
         **kwargs: Optional arguments
             json (dict/list): JSON-encode as request body (sets Content-Type)
-            timeout (int): Request timeout in seconds (default: 5)
+            timeout (int, float or None): Request timeout in seconds, None for none (default: 5)
             headers (dict): HTTP headers to send
             params (dict): Query parameters to append to the URL
             auth (tuple/list): Basic authentication as (username, password)
@@ -188,7 +188,7 @@ def parallel(requests: list[dict[str, Any]], max_parallel: int = 4) -> list[Resp
             - headers (dict, optional): HTTP headers
             - params (dict, optional): Query parameters
             - auth (list, optional): Basic auth as [username, password]
-            - timeout (int, optional): Timeout in seconds (default: 30)
+            - timeout (int, float or None, optional): Timeout in seconds, None for none (default: 30)
             - verify (bool | str | None, optional): Verify the server's TLS certificate (default: True), or a CA bundle path
         max_parallel: Maximum number of concurrent requests (default: 4)
 

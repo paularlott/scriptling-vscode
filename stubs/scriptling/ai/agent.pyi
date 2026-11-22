@@ -58,7 +58,7 @@ class Agent:
     mcp_servers: list["MCPClient"]
     max_tokens: int
     compaction_threshold: int
-    request_timeout: int
+    request_timeout: float
     extra_body: Optional[dict[str, Any]]
     stop_reason: str
     """Why the last trigger() stopped: "done" (the model answered),
@@ -76,7 +76,7 @@ class Agent:
         mcp_servers: Optional[list["MCPClient"]] = None,
         max_tokens: int = 32000,
         compaction_threshold: int = 80,
-        request_timeout: int = 300,
+        request_timeout: float = 300,
         extra_body: Optional[dict[str, Any]] = None
     ) -> None:
         """

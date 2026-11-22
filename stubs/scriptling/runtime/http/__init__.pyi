@@ -340,7 +340,7 @@ class WebSocketClient:
         """
         ...
 
-    def receive(self, timeout: float = 30) -> Any:
+    def receive(self, timeout: Optional[float] = 30) -> Any:
         """
         Receive a message from the client.
 

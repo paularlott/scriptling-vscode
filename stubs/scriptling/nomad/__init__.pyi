@@ -350,14 +350,14 @@ class NomadClient:
         """
         ...
 
-    def wait_job_stopped(self, id: str, *, namespace: str = "", timeout: int = 30) -> bool:
+    def wait_job_stopped(self, id: str, *, namespace: str = "", timeout: float = 30) -> bool:
         """
         Wait for a job to reach the "dead" status.
 
         Parameters:
             id (str): Job ID
             namespace (str, optional): Namespace. Default: "" (Nomad default namespace)
-            timeout (int, optional): Maximum time to wait in seconds. Default: 30
+            timeout (int or float, optional): Maximum time to wait in seconds. Default: 30
 
         Returns:
             bool: True if the job is stopped, False if the timeout was reached

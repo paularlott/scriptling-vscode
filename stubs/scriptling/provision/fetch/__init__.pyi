@@ -29,7 +29,7 @@ def file(
     dest: str,
     insecure: bool = False,
     unpack_zip: bool = False,
-    timeout: int = 30,
+    timeout: float = 30,
     max_bytes: int = 0,
     mode: int = 0o644,
     dir_mode: int = 0o755,

@@ -49,7 +49,7 @@ class MulticastGroup:
         """
         ...
 
-    def receive(self, timeout: float = 30) -> Optional[ReceiveResult]:
+    def receive(self, timeout: Optional[float] = 30) -> Optional[ReceiveResult]:
         """
         Receive a message from the multicast group.
 

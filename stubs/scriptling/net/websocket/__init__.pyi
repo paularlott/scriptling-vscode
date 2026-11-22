@@ -79,7 +79,7 @@ class WebSocketClientConn:
         """
         ...
 
-    def receive(self, timeout: float = 30) -> Optional[WebSocketMessage]:
+    def receive(self, timeout: Optional[float] = 30) -> Optional[WebSocketMessage]:
         """
         Receive a message from the server.
 
@@ -217,7 +217,7 @@ def send_binary(conn: WebSocketClientConn, data: list[int]) -> None:
     ...
 
 
-def receive(conn: WebSocketClientConn, timeout: float = 30) -> Optional[WebSocketMessage]:
+def receive(conn: WebSocketClientConn, timeout: Optional[float] = 30) -> Optional[WebSocketMessage]:
     """
     Receive a message from a connection.
 

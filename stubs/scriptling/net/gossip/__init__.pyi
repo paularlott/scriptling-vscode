@@ -19,7 +19,7 @@ Example:
     cluster.stop()
 """
 
-from typing import Optional, Callable, Any
+from typing import Optional, Callable, Any, Union
 
 # Constants
 MSG_USER: int
@@ -567,8 +567,8 @@ class Cluster:
 
     def create_leader_election(
         self,
-        check_interval: str = "1s",
-        leader_timeout: str = "3s",
+        check_interval: Union[float, str] = "1s",
+        leader_timeout: Union[float, str] = "3s",
         heartbeat_msg_type: int = 65,
         min_cluster_size: int = 0,
         metadata_criteria: Optional[dict[str, str]] = None
@@ -755,23 +755,23 @@ def create(
     app_version: str = "",
     transport: str = "socket",
     compress_min_size: int = 256,
-    gossip_interval: str = "5s",
-    gossip_max_interval: str = "20s",
-    metadata_gossip_interval: str = "500ms",
-    state_gossip_interval: str = "45s",
+    gossip_interval: Union[float, str] = "5s",
+    gossip_max_interval: Union[float, str] = "20s",
+    metadata_gossip_interval: Union[float, str] = "500ms",
+    state_gossip_interval: Union[float, str] = "45s",
     fan_out_multiplier: float = 1.0,
     ttl_multiplier: float = 1.0,
     state_exchange_multiplier: float = 0.8,
     force_reliable_transport: bool = False,
     prefer_ipv6: bool = False,
-    node_cleanup_interval: str = "20s",
-    node_retention_time: str = "1h",
-    leaving_node_timeout: str = "30s",
-    health_check_interval: str = "2s",
-    suspect_timeout: str = "1.5s",
-    suspect_retry_interval: str = "1s",
-    dead_node_timeout: str = "15s",
-    peer_recovery_interval: str = "30s",
+    node_cleanup_interval: Union[float, str] = "20s",
+    node_retention_time: Union[float, str] = "1h",
+    leaving_node_timeout: Union[float, str] = "30s",
+    health_check_interval: Union[float, str] = "2s",
+    suspect_timeout: Union[float, str] = "1.5s",
+    suspect_retry_interval: Union[float, str] = "1s",
+    dead_node_timeout: Union[float, str] = "15s",
+    peer_recovery_interval: Union[float, str] = "30s",
     insecure_skip_verify: bool = False
 ) -> Cluster:
     """
