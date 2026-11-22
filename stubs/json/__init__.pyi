@@ -5,7 +5,7 @@ JSON encoding and decoding: parse JSON strings into Scriptling values and
 serialize them back.
 """
 
-from typing import Any, Optional, Union
+from typing import Any, Callable, Optional, Union
 
 class JSONDecodeError(ValueError):
     """Raised by loads() on malformed JSON; subclasses ValueError, as in Python."""
@@ -38,7 +38,8 @@ def dumps(
     indent: Union[str, int, float] = None,
     separators: Optional[tuple[str, str]] = None,
     sort_keys: bool = False,
-    ensure_ascii: bool = True
+    ensure_ascii: bool = True,
+    default: Optional[Callable[[Any], Any]] = None
 ) -> str:
     """
     Serialize a Scriptling value to a JSON string.
@@ -59,6 +60,10 @@ def dumps(
         sort_keys: If True, emit dict keys in sorted order (default False).
         ensure_ascii: If True (default), escape non-ASCII characters as
             \\uXXXX; pass False to emit them as-is.
+        default: Called with any value that is not a dict, list, tuple,
+            string, number, boolean or None, and returns a value to encode
+            in its place (default=str is common). Without it such a value
+            raises TypeError.
 
     Example:
         json.dumps({"b": 1, "a": 2})                         # '{"b": 1, "a": 2}'
@@ -69,6 +74,8 @@ def dumps(
         json.dumps({"a": [1, 2]}, indent="  ")               # same, string indent verbatim
 
     Raises:
+        TypeError: for a value JSON cannot represent (a set, datetime or
+            object) when default is not given.
         MemoryError: if the text (indentation included) grows past the
             interpreter's value limit, or its memory limit when that is
             lower; encoding stops as soon as it does.
@@ -80,7 +87,8 @@ def stringify(
     indent: Union[str, int, float] = None,
     separators: Optional[tuple[str, str]] = None,
     sort_keys: bool = False,
-    ensure_ascii: bool = True
+    ensure_ascii: bool = True,
+    default: Optional[Callable[[Any], Any]] = None
 ) -> str:
     """
     Serialize a Scriptling value to a JSON string (alias for dumps).

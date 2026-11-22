@@ -8,7 +8,8 @@ class Path:
     name: str
     stem: str
     suffix: str
-    parent: str
+    suffixes: List[str]
+    parent: "Path"
     parts: Tuple[str, ...]
 
     def __init__(self, path: str) -> None:
@@ -24,6 +25,46 @@ class Path:
 
     def __str__(self) -> str:
         """The path as a string."""
+        ...
+
+    def __eq__(self, other: object) -> bool:
+        """Paths are equal when their paths are."""
+        ...
+
+    def __lt__(self, other: "Path") -> bool:
+        """Order paths by their path strings."""
+        ...
+
+    def __hash__(self) -> int:
+        """Hash of the path string, so paths work in sets and as dict keys."""
+        ...
+
+    def with_name(self, name: str) -> "Path":
+        """A new path with the final component replaced."""
+        ...
+
+    def with_suffix(self, suffix: str) -> "Path":
+        """A new path with the suffix changed (added, or removed with "")."""
+        ...
+
+    def with_stem(self, stem: str) -> "Path":
+        """A new path with the stem changed, keeping the suffix."""
+        ...
+
+    def is_absolute(self) -> bool:
+        """True for a path starting at the root."""
+        ...
+
+    def as_posix(self) -> str:
+        """The path as a string with forward slashes."""
+        ...
+
+    def relative_to(self, other: "str | Path") -> "Path":
+        """This path relative to other; ValueError when it is not under other."""
+        ...
+
+    def is_relative_to(self, other: "str | Path") -> bool:
+        """True when this path is under other."""
         ...
 
     def exists(self) -> bool:
