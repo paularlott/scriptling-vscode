@@ -312,3 +312,117 @@ def progress(progress: float, total: Optional[float] = None, message: Optional[s
             mcp.tool.progress(i + 1, total=len(items), message="Processed " + item)
     """
     ...
+
+# Asking the person using the MCP client (elicitation)
+def can_ask() -> bool:
+    """
+    Whether the person using the MCP client can be asked questions.
+
+    True when the client supports elicitation for this call, so ask() and
+    confirm() reach the person; False otherwise, when ask() returns None and
+    confirm() returns False.
+
+    Example:
+        if not mcp.tool.can_ask():
+            mcp.tool.return_error("Ask the user to confirm, then call again with confirm=true")
+    """
+    ...
+
+def ask(message: str, schema: dict[str, Any], key: str = "") -> Optional[dict[str, Any]]:
+    """
+    Ask the person a question through the MCP client.
+
+    Shows message with a form built from schema: a JSON Schema object of flat
+    properties (string, number, integer, boolean, string enums, multi-select
+    arrays of enums), as MCP elicitation allows.
+
+    Some clients answer by calling the tool again: the script stops at the
+    question and runs again from the top, and this time ask() returns the
+    answer at once. So read and check before asking, write only after the
+    answer, and keep slow work for that run with remember(). Left empty, key
+    is derived from the message and schema, so an answer is never taken for a
+    different question; integer properties come back as ints, and a question
+    nobody answers in time comes back as {"action": "cancel"}.
+
+    Parameters:
+        message: What is being asked, and why
+        schema: The form, as a JSON Schema object
+        key: The question's name, the same on every run
+
+    Returns:
+        {"action": "accept", "content": {...}}, {"action": "decline"} or
+        {"action": "cancel"}; None when the client cannot be asked
+
+    Example:
+        answer = mcp.tool.ask("Which environment?", {
+            "type": "object",
+            "properties": {"env": {"type": "string", "enum": ["staging", "prod"]}},
+            "required": ["env"],
+        })
+        if answer is None or answer["action"] != "accept":
+            mcp.tool.return_error("No environment chosen")
+    """
+    ...
+
+def confirm(message: str) -> bool:
+    """
+    Ask the person to approve an action through the MCP client.
+
+    Shows message with an Approve box. Returns True only when the person
+    submitted it with the box ticked; False when they declined, dismissed it
+    or left it unticked, and when the client cannot be asked (see can_ask()).
+
+    As with ask(), the tool may run again from the top to deliver the
+    answer, so check everything before confirm() and write only after it
+    returns True.
+
+    Parameters:
+        message: The action to approve
+
+    Returns:
+        True if approved
+
+    Example:
+        if not mcp.tool.confirm("Delete the 12 archived invoices?"):
+            mcp.tool.return_error("Not confirmed, nothing was deleted")
+    """
+    ...
+
+def remember(name: str, value: Any) -> bool:
+    """
+    Keep a value for the tool's re-run after a question.
+
+    When the client answers ask() or confirm() by calling the tool again, the
+    script runs again from the top. Keep slow or AI work done before the
+    question with remember() and read it back with recall(), so it is not
+    done twice. The value travels with the question to the client and back,
+    signed so it cannot be changed: keep it small, and keep only what the
+    person may see.
+
+    Parameters:
+        name: The value's name
+        value: Plain values, lists and dicts
+
+    Returns:
+        True if kept; False when there will be no re-run to keep it for
+
+    Example:
+        plan = mcp.tool.recall("plan")
+        if plan is None:
+            plan = make_plan()
+            mcp.tool.remember("plan", plan)
+    """
+    ...
+
+def recall(name: str, default: Any = None) -> Any:
+    """
+    Read back what remember() kept on an earlier run of this tool call.
+
+    Parameters:
+        name: The value's name
+        default: Returned when nothing was kept
+
+    Returns:
+        The kept value, or default
+    """
+    ...
