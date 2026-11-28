@@ -418,6 +418,10 @@ def recall(name: str, default: Any = None) -> Any:
     """
     Read back what remember() kept on an earlier run of this tool call.
 
+    A kept value travels as JSON, so it comes back with JSON's types: a whole
+    number is an int (also inside lists and dicts), any other number a float,
+    a tuple a list.
+
     Parameters:
         name: The value's name
         default: Returned when nothing was kept
